@@ -4,10 +4,10 @@ export const COMPANY = {
   name: "Rahama Land and Property Development Ltd.",
   short: "Rahama Land & Property",
   rc: "9871926",
-  address: "Along Potiskum Road, Azare, Bauchi State, Nigeria",
-  phones: ["+234 803 000 0001", "+234 806 000 0002"],
-  whatsapp: "2348030000001",
-  email: "info@rahamaproperty.ng",
+  address: "No. 12, Old Kano Road, Azare, Katagum LGA, Bauchi State, Nigeria",
+  phones: ["+234 806 378 4070", "+234 703 780 7271"],
+  whatsapp: "2348063784070",
+  email: "rahmalapd@gmail.com",
   hours: "Mon – Sat, 8:00am – 5:00pm",
 };
 

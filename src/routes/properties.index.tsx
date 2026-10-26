@@ -1,0 +1,101 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { z } from "zod";
+import { SlidersHorizontal } from "lucide-react";
+import { PageHero, PublicLayout } from "@/components/site/PublicLayout";
+import { PropertyCard } from "@/components/site/PropertyCard";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStore } from "@/lib/store";
+import { isPublic } from "@/lib/format";
+import { AREAS } from "@/lib/sample-data";
+
+const searchSchema = z.object({
+  q: z.string().optional(),
+  type: z.string().optional(),
+  location: z.string().optional(),
+  area: z.string().optional(),
+  unit: z.string().optional(),
+  min: z.coerce.number().optional(),
+  max: z.coerce.number().optional(),
+});
+
+export const Route = createFileRoute("/properties/")({
+  validateSearch: searchSchema,
+  head: () => ({
+    meta: [
+      { title: "Properties for Sale in Azare & Bauchi — Rahama Land & Property" },
+      { name: "description", content: "Browse residential land, commercial land and houses for sale in Azare and Bauchi State. Filter by type, area, price and size." },
+      { property: "og:title", content: "Properties for Sale — Rahama Land & Property" },
+      { property: "og:description", content: "Land plots and houses in Azare and Bauchi State." },
+    ],
+  }),
+  component: Catalogue,
+});
+
+function Catalogue() {
+  const s = Route.useSearch();
+  const navigate = useNavigate({ from: "/properties/" });
+  const properties = useStore((st) => st.properties);
+  const setS = (patch: Partial<typeof s>) => navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+
+  const list = useMemo(
+    () =>
+      properties.filter((p) => {
+        if (!isPublic(p.status)) return false;
+        if (s.q && !`${p.title} ${p.ref} ${p.area}`.toLowerCase().includes(s.q.toLowerCase())) return false;
+        if (s.type && p.type !== s.type) return false;
+        if (s.location && p.location !== s.location) return false;
+        if (s.area && p.area !== s.area) return false;
+        if (s.unit && p.sizeUnit !== s.unit) return false;
+        if (s.min != null && p.price < s.min) return false;
+        if (s.max != null && p.price > s.max) return false;
+        return true;
+      }),
+    [properties, s],
+  );
+
+  const sel = (value: string | undefined, onChange: (v: string | undefined) => void, placeholder: string, items: [string, string][]) => (
+    <Select value={value ?? "all"} onValueChange={(v) => onChange(v === "all" ? undefined : v)}>
+      <SelectTrigger aria-label={placeholder}><SelectValue placeholder={placeholder} /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">{placeholder}</SelectItem>
+        {items.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  );
+
+  return (
+    <PublicLayout>
+      <PageHero eyebrow="Property catalogue" title="Land & homes for sale" subtitle="Verified listings across Azare and Bauchi State." />
+      <div className="mx-auto max-w-7xl px-4 py-10">
+        <div className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-3 lg:grid-cols-7">
+          <Input className="lg:col-span-2" placeholder="Search title, area or ref…" value={s.q ?? ""} onChange={(e) => setS({ q: e.target.value || undefined })} />
+          {sel(s.type, (v) => setS({ type: v }), "All types", [["Residential Land", "Residential Land"], ["Commercial Land", "Commercial Land"], ["House/Villa", "House / Villa"]])}
+          {sel(s.location, (v) => setS({ location: v, area: undefined }), "All locations", [["Azare", "Azare"], ["Bauchi", "Bauchi"]])}
+          {sel(s.area, (v) => setS({ area: v }), "All areas", AREAS.filter((a) => !s.location || a.includes(s.location)).map((a) => [a, a]))}
+          {sel(s.unit, (v) => setS({ unit: v }), "Any size unit", [["plots", "Plots"], ["sqm", "Square metres"], ["hectares", "Hectares"]])}
+          <div className="flex gap-2">
+            <Input type="number" placeholder="Min ₦" value={s.min ?? ""} onChange={(e) => setS({ min: e.target.value ? Number(e.target.value) : undefined })} />
+            <Input type="number" placeholder="Max ₦" value={s.max ?? ""} onChange={(e) => setS({ max: e.target.value ? Number(e.target.value) : undefined })} />
+          </div>
+        </div>
+        <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
+          <span className="flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />{list.length} {list.length === 1 ? "property" : "properties"} found</span>
+          <Button variant="ghost" size="sm" onClick={() => navigate({ search: {}, replace: true })}>Clear filters</Button>
+        </div>
+        {list.length === 0 ? (
+          <div className="mt-10 rounded-xl border border-dashed p-16 text-center">
+            <p className="text-lg font-semibold">No properties match these filters.</p>
+            <p className="text-muted-foreground">Try widening your budget or location.</p>
+          </div>
+        ) : (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((p) => <PropertyCard key={p.id} p={p} />)}
+          </div>
+        )}
+      </div>
+    </PublicLayout>
+  );
+}

@@ -16,3 +16,15 @@ describe("format rules", () => {
     expect(isPublic("Sold")).toBe(true);
   });
 });
+
+import { COMPANY } from "./format";
+describe("official contact details", () => {
+  it("whatsapp links go to the official number", () => {
+    expect(whatsappLink("hi")).toBe("https://wa.me/2348063784070?text=hi");
+  });
+  it("uses official phones, email and address", () => {
+    expect(COMPANY.phones).toEqual(["+234 806 378 4070", "+234 703 780 7271"]);
+    expect(COMPANY.email).toBe("rahmalapd@gmail.com");
+    expect(COMPANY.address).toBe("No. 12, Old Kano Road, Azare, Katagum LGA, Bauchi State, Nigeria");
+  });
+});

@@ -13,7 +13,7 @@ const TONES: { v: Tone; l: string }[] = [
   { v: "hausa", l: "Hausa greeting" },
 ];
 
-const prioClass = { High: "bg-destructive text-destructive-foreground", Medium: "bg-warning text-warning-foreground", Low: "bg-muted text-muted-foreground" };
+const prioClass = { High: "bg-destructive text-destructive-foreground", Medium: "bg-warning text-foreground", Low: "bg-muted text-muted-foreground" };
 
 export function LeadAdvisor({ name, phone, message, property, onSaveNote }: { name: string; phone?: string; message: string; property?: Property; onSaveNote?: (note: string) => void }) {
   const [tone, setTone] = useState<Tone>("formal");

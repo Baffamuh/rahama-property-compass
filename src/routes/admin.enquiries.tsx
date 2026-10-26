@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { LeadAdvisor } from "@/components/admin/LeadAdvisor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/enquiries")({
@@ -20,6 +21,7 @@ const STATUSES: EnquiryStatus[] = ["New", "Contacted", "Viewing Scheduled", "Clo
 
 function Enquiries() {
   const enquiries = useStore((s) => s.enquiries);
+  const properties = useStore((s) => s.properties);
   const [filter, setFilter] = useState<string>("all");
   const [q, setQ] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -67,6 +69,7 @@ function Enquiries() {
             </div>
             <div><p className="text-xs uppercase text-muted-foreground">Property</p><p className="font-medium">{selected.propertyRef ? `${selected.propertyRef} — ${selected.propertyTitle}` : "General enquiry"}</p></div>
             <div><p className="text-xs uppercase text-muted-foreground">Message</p><p className="mt-1 rounded-lg bg-muted p-3">{selected.message}</p></div>
+            <LeadAdvisor key={selected.id} name={selected.name} phone={selected.phone} message={selected.message} property={properties.find((p) => p.ref === selected.propertyRef)} onSaveNote={(n) => { const cur = notes[selected.id] ?? selected.notes; const next = cur ? `${cur}\n${n}` : n; setNotes({ ...notes, [selected.id]: next }); actions.updateEnquiry(selected.id, { notes: next }); toast.success("Saved to notes"); }} />
             <div className="space-y-2">
               <p className="text-xs uppercase text-muted-foreground">Internal notes</p>
               <Textarea rows={4} value={notes[selected.id] ?? selected.notes} onChange={(e) => setNotes({ ...notes, [selected.id]: e.target.value })} placeholder="Only visible to staff…" />

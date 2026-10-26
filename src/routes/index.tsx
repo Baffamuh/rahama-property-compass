@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, FileCheck2, Globe2, Handshake, MapPinned, ShieldCheck, Video } from "lucide-react";
 import { PublicLayout } from "@/components/site/PublicLayout";
 import { PropertyCard } from "@/components/site/PropertyCard";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
@@ -131,6 +131,45 @@ function Home() {
           <p className="mt-4 text-muted-foreground">{COMPANY.name} is headquartered in Azare and serves buyers across Bauchi State and the diaspora. Every plot we sell is surveyed and every document is checked before it reaches you.</p>
           <Button asChild variant="outline" className="mt-6"><Link to="/about">Learn more about us</Link></Button>
         </div>
+      </section>
+
+      <section className="bg-secondary">
+        <div className="mx-auto max-w-7xl px-4 py-20">
+          <p className="text-sm font-bold uppercase tracking-widest text-primary">Safe acquisition</p>
+          <h2 className="mt-2 text-3xl font-bold md:text-4xl">How you buy land with Rahama</h2>
+          <ol className="mt-10 grid gap-6 md:grid-cols-4">
+            {[
+              { i: MapPinned, t: "Inspect", d: "Free guided site visit with our field team in Azare." },
+              { i: FileCheck2, t: "Verify", d: "We show you the survey plan and title documents before payment." },
+              { i: Handshake, t: "Pay securely", d: "Pay outright or by instalment into our corporate account only." },
+              { i: ShieldCheck, t: "Get your papers", d: "Receive your receipt, Deed of Assignment and allocation letter." },
+            ].map((s, n) => (
+              <li key={s.t} className="rounded-2xl border bg-card p-6">
+                <div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">{n + 1}</span><s.i className="h-5 w-5 text-primary" /></div>
+                <h3 className="mt-4 text-lg font-bold">{s.t}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-8 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-primary" />Registered with CAC · {COMPANY.rc}</p>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-10 px-4 py-20 md:grid-cols-2 md:items-center">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-widest text-primary">For the diaspora</p>
+          <h2 className="mt-2 text-3xl font-bold md:text-4xl">Own land at home — from Abuja, Lagos or abroad.</h2>
+          <p className="mt-4 text-muted-foreground">Many of our buyers are Katagum indigenes living elsewhere. We make remote buying safe and transparent.</p>
+        </div>
+        <ul className="grid gap-4">
+          {[
+            { i: Video, t: "Live video inspection", d: "Walk the plot with us on a WhatsApp video call." },
+            { i: FileCheck2, t: "Documents sent to you", d: "Scanned survey plan and title papers before you pay." },
+            { i: Globe2, t: "Trusted representative", d: "A family member can inspect and sign on your behalf." },
+          ].map((x) => (
+            <li key={x.t} className="flex gap-4 rounded-xl border bg-card p-5"><x.i className="h-6 w-6 shrink-0 text-primary" /><div><p className="font-bold">{x.t}</p><p className="text-sm text-muted-foreground">{x.d}</p></div></li>
+          ))}
+        </ul>
       </section>
 
       <section className="mx-auto max-w-7xl px-4">

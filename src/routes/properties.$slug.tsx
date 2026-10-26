@@ -5,6 +5,7 @@ import { PublicLayout } from "@/components/site/PublicLayout";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { EnquiryForm } from "@/components/site/EnquiryForm";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
+import { InspectionBooking, InstallmentCalculator, TitleBadges } from "@/components/site/PropertyExtras";
 import { useStore } from "@/lib/store";
 import { formatNaira, formatSize, isPublic, propertyWhatsappMessage } from "@/lib/format";
 import { sampleProperties } from "@/lib/sample-data";
@@ -81,6 +82,9 @@ function Detail() {
               ))}
             </div>
 
+            <h2 className="mt-10 text-xl font-bold">Title & documentation</h2>
+            <div className="mt-3"><TitleBadges p={p} /></div>
+
             <h2 className="mt-10 text-xl font-bold">About this property</h2>
             <p className="mt-3 leading-relaxed text-muted-foreground">{p.description}</p>
 
@@ -91,6 +95,8 @@ function Detail() {
 
             <h2 className="mt-10 text-xl font-bold">Location</h2>
             <p className="mt-3 text-muted-foreground">Located at {p.area}. Exact coordinates and directions are shared during site inspection booking.</p>
+
+            {p.status !== "Sold" && <div className="mt-10"><InstallmentCalculator price={p.price} /></div>}
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -98,6 +104,7 @@ function Detail() {
               <h2 className="text-lg font-bold">Interested in this property?</h2>
               <p className="mb-4 text-sm text-muted-foreground">Fastest response is on WhatsApp.</p>
               <WhatsAppButton className="w-full" message={propertyWhatsappMessage(p)} />
+              {p.status !== "Sold" && <div className="mt-3"><InspectionBooking p={p} /></div>}
               <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or send an enquiry<span className="h-px flex-1 bg-border" /></div>
               <EnquiryForm propertyRef={p.ref} propertyTitle={p.title} defaultMessage={`I'm interested in ${p.title} (${p.ref}).`} />
             </div>

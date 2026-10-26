@@ -93,12 +93,12 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
   const [imgUrl, setImgUrl] = useState("");
   const set = <K extends keyof Property>(k: K, v: Property[K]) => setP((x) => ({ ...x, [k]: v }));
 
-  const save = () => {
-    if (p.title.trim().length < 3) return toast.error("Please enter a title");
-    if (p.price <= 0) return toast.error("Please enter a price");
-    if (p.images.length === 0) return toast.error("Add at least one image");
+  const save = (): void => {
+    if (p.title.trim().length < 3) { toast.error("Please enter a title"); return; }
+    if (p.price <= 0) { toast.error("Please enter a price"); return; }
+    if (p.images.length === 0) { toast.error("Add at least one image"); return; }
     const ref = p.ref.trim() || `RHM-${p.location === "Azare" ? "AZR" : "BAU"}-${String(existing.length + 1).padStart(3, "0")}`;
-    if (existing.some((x) => x.ref === ref && x.id !== p.id)) return toast.error("Reference code already in use");
+    if (existing.some((x) => x.ref === ref && x.id !== p.id)) { toast.error("Reference code already in use"); return; }
     const slug = p.slug || slugify(`${p.title}-${ref}`);
     actions.saveProperty({ ...p, ref, slug, title: p.title.trim() });
     toast.success(isNew ? "Property created" : "Property updated");

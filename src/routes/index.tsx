@@ -151,7 +151,7 @@ function Home() {
               </li>
             ))}
           </ol>
-          <p className="mt-8 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-primary" />Registered with CAC · {COMPANY.rc}</p>
+          <p className="mt-8 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-primary" />Registered with CAC · RC NO. {COMPANY.rc}</p>
         </div>
       </section>
 

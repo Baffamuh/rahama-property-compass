@@ -42,7 +42,7 @@ export function InstallmentCalculator({ price }: { price: number }) {
       <p className="text-sm text-muted-foreground">Estimate only — final terms are agreed at our office.</p>
       <div className="mt-5 space-y-2">
         <div className="flex justify-between text-sm"><Label>Down payment</Label><span className="font-semibold">{down}% · {formatNaira(deposit)}</span></div>
-        <Slider min={20} max={100} step={5} value={[down]} onValueChange={(v) => setDown(v[0])} aria-label="Down payment percent" />
+        <Slider min={20} max={100} step={5} value={[down]} onValueChange={(v) => setDown(v[0] ?? 30)} aria-label="Down payment percent" />
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
         {[3, 6, 12].map((m) => <Button key={m} size="sm" variant={months === m ? "default" : "outline"} onClick={() => setMonths(m)}>{m} months</Button>)}
@@ -60,7 +60,7 @@ export function InspectionBooking({ p }: { p: Property }) {
   const [form, setForm] = useState({ name: "", phone: "", date: "", time: "10:00" });
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.name.trim().length < 2 || form.phone.replace(/\D/g, "").length < 10 || !form.date) return toast.error("Please enter your name, phone and a date");
+    if (form.name.trim().length < 2 || form.phone.replace(/\D/g, "").length < 10 || !form.date) { toast.error("Please enter your name, phone and a date"); return; }
     actions.addEnquiry({ name: form.name.trim(), phone: form.phone.trim(), propertyRef: p.ref, propertyTitle: p.title, message: `I want to book a site inspection on ${form.date} at ${form.time}.` });
     toast.success("Inspection request sent — our field team will call to confirm.");
     setOpen(false);

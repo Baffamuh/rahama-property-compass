@@ -63,7 +63,7 @@ function AdminProperties() {
                 <td className="p-3">{formatSize(p.size, p.sizeUnit)}</td>
                 <td className="p-3">
                   <Select value={p.status} onValueChange={(v) => { actions.setStatus(p.id, v as PropertyStatus); toast.success(`${p.ref} set to ${v}`); }}>
-                    <SelectTrigger className="h-8 w-36 border-0 bg-transparent p-0 shadow-none" aria-label="Change status"><StatusBadge status={p.status} className="after:content-['_▾']" /></SelectTrigger>
+                    <SelectTrigger className="h-8 w-36 border-0 bg-transparent p-0 shadow-none" aria-label="Change status"><StatusBadge status={p.status} /></SelectTrigger>
                     <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </td>

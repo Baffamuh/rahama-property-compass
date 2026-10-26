@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture
+- Data lives in a local mock store (src/lib/store.ts, localStorage) with typed models in src/lib/types.ts; swap its `actions` for backend calls when a database is connected, because every page reads only through `useStore`/`actions`.
+- Admin sign-in is a demo-only placeholder (sessionStorage); replace with real authentication before going live.

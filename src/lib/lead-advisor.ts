@@ -8,7 +8,7 @@ export type Tone = "formal" | "warm" | "hausa";
 export interface LeadInput {
   name: string;
   message: string;
-  property?: Property;
+  property?: Property | undefined;
 }
 
 export interface LeadAnalysis {

@@ -15,7 +15,7 @@ const TONES: { v: Tone; l: string }[] = [
 
 const prioClass = { High: "bg-destructive text-destructive-foreground", Medium: "bg-warning text-foreground", Low: "bg-muted text-muted-foreground" };
 
-export function LeadAdvisor({ name, phone, message, property, onSaveNote }: { name: string; phone?: string; message: string; property?: Property; onSaveNote?: (note: string) => void }) {
+export function LeadAdvisor({ name, phone, message, property, onSaveNote }: { name: string; phone?: string; message: string; property?: Property | undefined; onSaveNote?: (note: string) => void }) {
   const [tone, setTone] = useState<Tone>("formal");
   const analysis = useMemo(() => analyzeLead({ name, message, property }), [name, message, property]);
   const auto = useMemo(() => draftReply({ name, message, property }, analysis, tone), [name, message, property, analysis, tone]);

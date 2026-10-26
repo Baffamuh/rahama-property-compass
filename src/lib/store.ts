@@ -40,7 +40,7 @@ function set(next: State) {
 function subscribe(l: () => void) {
   load();
   listeners.add(l);
-  l();
+
   return () => listeners.delete(l);
 }
 

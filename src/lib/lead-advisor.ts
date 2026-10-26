@@ -22,7 +22,7 @@ export interface LeadAnalysis {
 const SIGNALS: { re: RegExp; pts: number; label: string }[] = [
   { re: /\b(inspect|inspection|visit|see the (land|plot|house)|come (and|to) see)\b/i, pts: 3, label: "Wants a site inspection" },
   { re: /\b(cash|ready to (pay|buy)|pay (now|today|outright)|funds? (is|are) ready|transfer)\b/i, pts: 3, label: "Funds appear ready" },
-  { re: /\b(urgent|asap|immediately|this week|today|tomorrow|quickly)\b/i, pts: 2, label: "Urgent timeline" },
+  { re: /\b(urgent|asap|immediately|this week|today|tomorrow|quickly|monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend)\b/i, pts: 2, label: "Urgent timeline" },
   { re: /\b(buy|purchase|acquire|interested|reserve|book)\b/i, pts: 1, label: "Clear purchase intent" },
   { re: /\b(installment|instalment|payment plan|spread)\b/i, pts: 1, label: "Asking about payment plan" },
   { re: /\b(diaspora|abroad|abuja|lagos|kano|overseas|uk|usa|saudi)\b/i, pts: 1, label: "Remote / diaspora buyer" },
@@ -57,7 +57,7 @@ export function analyzeLead({ message, property }: LeadInput): LeadAnalysis {
 export function draftReply({ name, property }: LeadInput, a: LeadAnalysis, tone: Tone): string {
   const first = name.trim().split(/\s+/)[0] || "there";
   const greet = tone === "hausa" ? `Assalamu alaikum ${first}, barka da kokari.` : tone === "warm" ? `Hello ${first}! 😊` : `Dear ${name.trim() || "Sir/Madam"},`;
-  const thanks = tone === "formal" ? `Thank you for your enquiry to ${COMPANY.name}.` : `Thank you for reaching out to Rahama Land & Property.`;
+  const thanks = tone === "formal" ? `Thank you for your enquiry to ${COMPANY.name.replace(/\.$/, "")}.` : `Thank you for reaching out to Rahama Land & Property.`;
   let body = "";
   if (property) {
     const avail = property.status === "Sold" ? "has unfortunately been sold, but we have similar options available" : property.status === "Reserved" ? "is currently reserved; we can place you on the waitlist or show you similar plots" : "is available";

@@ -56,9 +56,9 @@ function Detail() {
               <img src={p.images[active]} alt={p.title} width={1200} height={800} className="aspect-[3/2] w-full object-cover" />
             </div>
             {p.images.length > 1 && (
-              <div className="mt-3 flex gap-3">
+              <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
                 {p.images.map((img, i) => (
-                  <button key={i} onClick={() => setActive(i)} aria-label={`Photo ${i + 1}`} className={`overflow-hidden rounded-lg border-2 ${i === active ? "border-primary" : "border-transparent opacity-70"}`}>
+                  <button key={i} onClick={() => setActive(i)} aria-label={`Photo ${i + 1}`} className={`shrink-0 overflow-hidden rounded-lg border-2 ${i === active ? "border-primary" : "border-transparent opacity-70"}`}>
                     <img src={img} alt="" loading="lazy" className="h-20 w-28 object-cover" />
                   </button>
                 ))}
@@ -104,13 +104,18 @@ function Detail() {
               <h2 className="text-lg font-bold">Interested in this property?</h2>
               <p className="mb-4 text-sm text-muted-foreground">Fastest response is on WhatsApp.</p>
               <WhatsAppButton className="w-full" message={propertyWhatsappMessage(p)} />
-              {p.status !== "Sold" && <div className="mt-3"><InspectionBooking p={p} /></div>}
+              {p.status !== "Sold" && <div className="mt-3" id="book-inspection"><InspectionBooking p={p} /></div>}
               <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or send an enquiry<span className="h-px flex-1 bg-border" /></div>
               <EnquiryForm propertyRef={p.ref} propertyTitle={p.title} defaultMessage={`I'm interested in ${p.title} (${p.ref}).`} />
             </div>
           </aside>
         </div>
       </div>
+      <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t bg-background/95 p-3 shadow-lg backdrop-blur lg:hidden">
+        {p.status !== "Sold" && <a href="#book-inspection" className="inline-flex flex-1 items-center justify-center rounded-md border border-primary px-3 py-3 text-sm font-semibold text-primary">Book inspection</a>}
+        <WhatsAppButton className="flex-1 px-3 text-sm" label="WhatsApp" message={propertyWhatsappMessage(p)} />
+      </div>
+      <div className="h-20 lg:hidden" />
     </PublicLayout>
   );
 }

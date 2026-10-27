@@ -13,7 +13,7 @@ export interface Property {
   location: string;
   area: string;
   zoneId?: string;
-  subZoneId?: string;
+  subZoneId?: string | undefined;
   price: number;
   size: number;
   sizeUnit: SizeUnit;

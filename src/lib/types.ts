@@ -42,3 +42,16 @@ export interface Activity {
   text: string;
   at: string;
 }
+
+export interface SubZone {
+  id: string;
+  name: string;
+  areas: string[];
+}
+
+export interface Zone {
+  id: string;
+  name: string;
+  town: string;
+  subZones: SubZone[];
+}

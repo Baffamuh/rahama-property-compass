@@ -5,6 +5,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { actions, useStore } from "@/lib/store";
 import { formatNaira, formatSize, slugify } from "@/lib/format";
 import { AREAS, IMAGES } from "@/lib/sample-data";
+import { areasOf, townsOf } from "@/lib/locations";
 import type { Property, PropertyStatus } from "@/lib/types";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -91,6 +92,10 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
   const [p, setP] = useState<Property>(initial);
   const [feature, setFeature] = useState("");
   const [imgUrl, setImgUrl] = useState("");
+  const zones = useStore((s) => s.zones);
+  const towns = [...new Set([...townsOf(zones), p.location])];
+  const townAreas = areasOf(zones, { town: p.location });
+  const areaList = townAreas.includes(p.area) ? townAreas : [p.area, ...townAreas];
   const set = <K extends keyof Property>(k: K, v: Property[K]) => setP((x) => ({ ...x, [k]: v }));
 
   const save = (): void => {
@@ -118,8 +123,8 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
         {row("Reference code", <Input placeholder="Auto e.g. RHM-AZR-009" value={p.ref} onChange={(e) => set("ref", e.target.value.toUpperCase())} />)}
         {row("Status", opt(p.status, (v) => set("status", v as PropertyStatus), STATUSES))}
         {row("Type", opt(p.type, (v) => set("type", v as Property["type"]), ["Residential Land", "Commercial Land", "House/Villa"]))}
-        {row("Town", opt(p.location, (v) => { set("location", v); set("area", AREAS.find((a) => a.includes(v)) ?? p.area); }, ["Azare", "Bauchi"]))}
-        {row("Area", opt(p.area, (v) => set("area", v), AREAS.filter((a) => a.includes(p.location))))}
+        {row("Town", opt(p.location, (v) => { set("location", v); set("area", areasOf(zones, { town: v })[0] ?? p.area); }, towns))}
+        {row("Area", opt(p.area, (v) => set("area", v), areaList))}
         {row("Price (₦)", <Input type="number" min={0} value={p.price || ""} onChange={(e) => set("price", Number(e.target.value))} />)}
         <div className="flex gap-2">
           <div className="flex-1">{row("Size", <Input type="number" min={0} value={p.size} onChange={(e) => set("size", Number(e.target.value))} />)}</div>

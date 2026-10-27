@@ -93,9 +93,11 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
   const [feature, setFeature] = useState("");
   const [imgUrl, setImgUrl] = useState("");
   const zones = useStore((s) => s.zones);
-  const towns = [...new Set([...townsOf(zones), p.location])];
-  const townAreas = areasOf(zones, { town: p.location });
-  const areaList = townAreas.includes(p.area) ? townAreas : [p.area, ...townAreas];
+  const legacy = findArea(zones, p.area);
+  const zone = zones.find((z) => z.id === p.zoneId) ?? legacy?.zone;
+  const subZone = zone?.subZones.find((s) => s.id === p.subZoneId) ?? (legacy?.zone.id === zone?.id ? legacy?.subZone : undefined);
+  const subAreas = zone ? areasOf(zones, { zoneId: zone.id, subZoneId: subZone?.id }) : [];
+  const areaList = subAreas.includes(p.area) ? subAreas : [p.area, ...subAreas];
   const set = <K extends keyof Property>(k: K, v: Property[K]) => setP((x) => ({ ...x, [k]: v }));
 
   const save = (): void => {
@@ -123,7 +125,24 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
         {row("Reference code", <Input placeholder="Auto e.g. RHM-AZR-009" value={p.ref} onChange={(e) => set("ref", e.target.value.toUpperCase())} />)}
         {row("Status", opt(p.status, (v) => set("status", v as PropertyStatus), STATUSES))}
         {row("Type", opt(p.type, (v) => set("type", v as Property["type"]), ["Residential Land", "Commercial Land", "House/Villa"]))}
-        {row("Town", opt(p.location, (v) => { set("location", v); set("area", areasOf(zones, { town: v })[0] ?? p.area); }, towns))}
+        {row("Zone", (
+          <Select value={zone?.id ?? ""} onValueChange={(v) => {
+            const z = zones.find((x) => x.id === v); const s = z?.subZones[0];
+            setP((x) => ({ ...x, zoneId: v, subZoneId: s?.id, location: z?.town ?? x.location, area: s?.areas[0] ?? x.area }));
+          }}>
+            <SelectTrigger><SelectValue placeholder="Choose zone" /></SelectTrigger>
+            <SelectContent>{zones.map((z) => <SelectItem key={z.id} value={z.id}>{z.name} ({z.town})</SelectItem>)}</SelectContent>
+          </Select>
+        ))}
+        {row("Sub-zone", (
+          <Select value={subZone?.id ?? ""} disabled={!zone} onValueChange={(v) => {
+            const s = zone?.subZones.find((x) => x.id === v);
+            setP((x) => ({ ...x, subZoneId: v, area: s?.areas[0] ?? x.area }));
+          }}>
+            <SelectTrigger><SelectValue placeholder={zone ? "Choose sub-zone" : "Pick a zone first"} /></SelectTrigger>
+            <SelectContent>{zone?.subZones.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+          </Select>
+        ))}
         {row("Area", opt(p.area, (v) => set("area", v), areaList))}
         {row("Price (₦)", <Input type="number" min={0} value={p.price || ""} onChange={(e) => set("price", Number(e.target.value))} />)}
         <div className="flex gap-2">

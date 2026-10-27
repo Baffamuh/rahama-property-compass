@@ -5,7 +5,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { actions, useStore } from "@/lib/store";
 import { formatNaira, formatSize, slugify } from "@/lib/format";
 import { AREAS, IMAGES } from "@/lib/sample-data";
-import { areasOf, townsOf } from "@/lib/locations";
+import { areasOf, findArea } from "@/lib/locations";
 import type { Property, PropertyStatus } from "@/lib/types";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";

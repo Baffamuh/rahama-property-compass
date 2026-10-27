@@ -3,17 +3,19 @@
 import { useSyncExternalStore } from "react";
 import { sampleActivity, sampleEnquiries, sampleProperties } from "./sample-data";
 import { sampleZones } from "./locations";
-import type { Activity, Enquiry, Property, SubZone, Zone } from "./types";
+import type { Activity, Agent, Enquiry, Property, Sale, SubZone, Zone } from "./types";
 
 interface State {
   properties: Property[];
   enquiries: Enquiry[];
   activity: Activity[];
   zones: Zone[];
+  agents: Agent[];
+  sales: Sale[];
 }
 
 const KEY = "rahama-store-v1";
-const initial: State = { properties: sampleProperties, enquiries: sampleEnquiries, activity: sampleActivity, zones: sampleZones };
+const initial: State = { properties: sampleProperties, enquiries: sampleEnquiries, activity: sampleActivity, zones: sampleZones, agents: [], sales: [] };
 let state: State = initial;
 let loaded = false;
 const listeners = new Set<() => void>();
@@ -25,7 +27,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const saved = JSON.parse(raw) as Partial<State>;
-      state = { ...initial, ...saved, zones: saved.zones ?? sampleZones };
+      state = { ...initial, ...saved, zones: saved.zones ?? sampleZones, agents: saved.agents ?? [], sales: saved.sales ?? [] };
     }
   } catch {
     /* ignore */
@@ -111,6 +113,26 @@ export const actions = {
   },
   deleteArea(zoneId: string, subId: string, area: string) {
     editSub(zoneId, subId, (s) => ({ ...s, areas: s.areas.filter((a) => a !== area) }));
+  },
+  saveAgent(a: Agent) {
+    const exists = state.agents.some((x) => x.id === a.id);
+    set({ ...state, agents: exists ? state.agents.map((x) => (x.id === a.id ? a : x)) : [...state.agents, a], activity: [log(`${exists ? "Updated" : "Added"} agent ${a.name}`), ...state.activity] });
+  },
+  recordSale(s: Omit<Sale, "id" | "receiptNo" | "status" | "createdAt">): Sale {
+    const year = s.date.slice(0, 4);
+    const n = state.sales.filter((x) => x.receiptNo.includes(`-${year}-`)).length + 1;
+    const sale: Sale = { ...s, id: uid(), receiptNo: `RHM-RCP-${year}-${String(n).padStart(4, "0")}`, status: "Completed", createdAt: new Date().toISOString() };
+    set({
+      ...state,
+      sales: [sale, ...state.sales],
+      properties: state.properties.map((p) => (p.id === s.propertyId ? { ...p, status: "Sold" } : p)),
+      activity: [log(`Sale recorded: ${s.propertyRef} (${sale.receiptNo})`), ...state.activity],
+    });
+    return sale;
+  },
+  cancelSale(id: string) {
+    const s = state.sales.find((x) => x.id === id);
+    set({ ...state, sales: state.sales.map((x) => (x.id === id ? { ...x, status: "Cancelled" } : x)), activity: [log(`Sale ${s?.receiptNo} cancelled`), ...state.activity] });
   },
   reset() {
     set(initial);

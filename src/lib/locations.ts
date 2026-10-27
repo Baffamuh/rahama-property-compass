@@ -24,7 +24,7 @@ export function townsOf(zones: Zone[]): string[] {
   return [...new Set(zones.map((z) => z.town))];
 }
 
-export function areasOf(zones: Zone[], filter: { town?: string; zoneId?: string; subZoneId?: string } = {}): string[] {
+export function areasOf(zones: Zone[], filter: { town?: string | undefined; zoneId?: string | undefined; subZoneId?: string | undefined } = {}): string[] {
   const out: string[] = [];
   for (const z of zones) {
     if (filter.town && z.town !== filter.town) continue;

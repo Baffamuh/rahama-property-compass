@@ -12,6 +12,8 @@ export interface Property {
   status: PropertyStatus;
   location: string;
   area: string;
+  zoneId?: string;
+  subZoneId?: string;
   price: number;
   size: number;
   sizeUnit: SizeUnit;
@@ -54,4 +56,35 @@ export interface Zone {
   name: string;
   town: string;
   subZones: SubZone[];
+}
+
+export interface Agent {
+  id: string;
+  code: string;
+  name: string;
+  phone: string;
+  email?: string;
+  zoneId?: string;
+  active: boolean;
+  joinedAt: string;
+}
+
+export type PaymentMethod = "Bank Transfer" | "Cash" | "Cheque" | "POS";
+
+export interface Sale {
+  id: string;
+  receiptNo: string;
+  agentId: string;
+  propertyId: string;
+  propertyRef: string;
+  propertyTitle: string;
+  buyerName: string;
+  buyerPhone: string;
+  price: number;
+  amountPaid: number;
+  commission: number;
+  method: PaymentMethod;
+  date: string;
+  status: "Completed" | "Cancelled";
+  createdAt: string;
 }

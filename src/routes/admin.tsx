@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Building2, ExternalLink, Inbox, LayoutDashboard, LogOut, Menu } from "lucide-react";
+import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { auth } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/admin")({
 const nav = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/admin/properties", label: "Properties", icon: Building2, exact: false },
+  { to: "/admin/locations", label: "Zones & Areas", icon: Map, exact: false },
   { to: "/admin/enquiries", label: "Enquiries", icon: Inbox, exact: false },
 ] as const;
 

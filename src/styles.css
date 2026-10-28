@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -158,4 +159,10 @@
 
 .bg-hero-overlay {
   background: var(--hero-overlay);
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white !important; }
+  @page { size: A4; margin: 14mm; }
 }

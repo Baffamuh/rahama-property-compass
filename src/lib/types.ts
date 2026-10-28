@@ -24,6 +24,14 @@ export interface Property {
   images: string[];
   featured: boolean;
   createdAt: string;
+  /** Map boundary corners [lat, lng]. Estimate only — not a certified survey. */
+  boundary?: [number, number][];
+  mapAreaSqm?: number;
+  areaDisplayUnit?: "sqft" | "sqm" | "plots" | "hectares" | "acres";
+  /** Verified area from a licensed surveyor, recorded separately. */
+  surveyAreaSqm?: number;
+  surveyRef?: string;
+  surveySource?: string;
 }
 
 export interface Enquiry {

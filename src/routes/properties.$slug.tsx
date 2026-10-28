@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/site/StatusBadge";
 import { EnquiryForm } from "@/components/site/EnquiryForm";
 import { WhatsAppButton } from "@/components/site/WhatsAppButton";
 import { InspectionBooking, InstallmentCalculator, TitleBadges } from "@/components/site/PropertyExtras";
+import { MeasurementSummary } from "@/components/site/LandMeasurement";
 import { useStore } from "@/lib/store";
 import { formatNaira, formatSize, isPublic, propertyWhatsappMessage } from "@/lib/format";
 import { sampleProperties } from "@/lib/sample-data";
@@ -81,6 +82,8 @@ function Detail() {
                 </div>
               ))}
             </div>
+
+            {(p.mapAreaSqm || p.surveyAreaSqm) ? <><h2 className="mt-10 text-xl font-bold">Land measurement</h2><div className="mt-3"><MeasurementSummary p={p} /></div></> : null}
 
             <h2 className="mt-10 text-xl font-bold">Title & documentation</h2>
             <div className="mt-3"><TitleBadges p={p} /></div>

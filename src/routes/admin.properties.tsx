@@ -7,6 +7,7 @@ import { formatNaira, formatSize, slugify } from "@/lib/format";
 import { AREAS, IMAGES } from "@/lib/sample-data";
 import { areasOf, findArea } from "@/lib/locations";
 import type { Property, PropertyStatus } from "@/lib/types";
+import { MeasurementEditor } from "@/components/site/LandMeasurement";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,7 +81,7 @@ function AdminProperties() {
       </div>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
           {editing && <Editor initial={editing} isNew={!properties.some((p) => p.id === editing.id)} existing={properties} onDone={() => setEditing(null)} />}
         </DialogContent>
       </Dialog>
@@ -173,6 +174,7 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
           <div className="flex gap-2">{LIBRARY.map((img) => <button key={img} onClick={() => set("images", [...p.images, img])} className="opacity-80 hover:opacity-100"><img src={img} alt="" className="h-12 w-16 rounded object-cover" /></button>)}</div>
           <div className="flex gap-2"><Input placeholder="…or paste an image URL (https://)" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} /><Button type="button" variant="outline" onClick={() => { if (/^https:\/\//.test(imgUrl)) { set("images", [...p.images, imgUrl]); setImgUrl(""); } else toast.error("Use an https:// link"); }}>Add</Button></div>
         </div>
+        <div className="sm:col-span-2"><MeasurementEditor p={p} onChange={(patch) => setP((x) => ({ ...x, ...patch }))} /></div>
         <label className="flex items-center gap-3 sm:col-span-2"><Switch checked={p.featured} onCheckedChange={(v) => set("featured", v)} />Feature on homepage</label>
       </div>
       <div className="mt-4 flex justify-end gap-2"><Button variant="outline" onClick={onDone}>Cancel</Button><Button onClick={save}>{isNew ? "Create property" : "Save changes"}</Button></div>

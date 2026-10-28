@@ -49,7 +49,7 @@ export function MeasurementEditor({ p, onChange }: { p: Property; onChange: (pat
             <SelectContent>{UNITS.map((u) => <SelectItem key={u} value={u}>{formatArea(0, u).replace(/^[\d.,]+ /, "")}</SelectItem>)}</SelectContent></Select>
         </div>
       </div>
-      <p className="flex items-start gap-1 text-xs text-warning-foreground"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{DISCLAIMER}</p>
+      <p className="flex items-start gap-1 text-xs text-muted-foreground"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{DISCLAIMER}</p>
 
       <div className="border-t pt-3">
         <p className="mb-2 flex items-center gap-2 text-sm font-semibold"><BadgeCheck className="h-4 w-4 text-primary" />Verified survey (licensed surveyor)</p>

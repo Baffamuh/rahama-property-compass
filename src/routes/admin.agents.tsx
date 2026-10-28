@@ -132,10 +132,10 @@ function AgentsPage() {
 
 function AgentForm({ initial, isNew, codes, zones, onDone }: { initial: Agent; isNew: boolean; codes: string[]; zones: { id: string; name: string }[]; onDone: () => void }) {
   const [a, setA] = useState(initial);
-  const save = () => {
-    if (a.name.trim().length < 2) return toast.error("Enter the agent's full name");
-    if (a.phone.replace(/\D/g, "").length < 10) return toast.error("Enter a valid phone number");
-    if (codes.includes(a.code.trim())) return toast.error("Agent ID already in use");
+  const save = (): void => {
+    if (a.name.trim().length < 2) { toast.error("Enter the agent's full name"); return; }
+    if (a.phone.replace(/\D/g, "").length < 10) { toast.error("Enter a valid phone number"); return; }
+    if (codes.includes(a.code.trim())) { toast.error("Agent ID already in use"); return; }
     actions.saveAgent({ ...a, name: a.name.trim(), code: a.code.trim() });
     toast.success(isNew ? "Agent added" : "Agent updated");
     onDone();
@@ -164,12 +164,12 @@ function SaleForm({ onDone }: { onDone: () => void }) {
   const properties = useStore((s) => s.properties).filter((p) => p.status !== "Sold" && p.status !== "Archived");
   const [f, setF] = useState({ agentId: agents[0]?.id ?? "", propertyId: "", buyerName: "", buyerPhone: "", price: 0, amountPaid: 0, commission: 0, method: "Bank Transfer" as PaymentMethod, date: today() });
   const prop = properties.find((p) => p.id === f.propertyId);
-  const save = () => {
-    if (!f.agentId || !prop) return toast.error("Choose the agent and the property");
-    if (f.buyerName.trim().length < 2) return toast.error("Enter the buyer's name");
-    if (f.price <= 0) return toast.error("Enter the agreed price");
-    if (f.amountPaid < 0 || f.amountPaid > f.price) return toast.error("Amount paid must be between ₦0 and the agreed price");
-    if (!confirm(`Record sale of ${prop.ref} for ${formatNaira(f.price)}? The property will be marked Sold.`)) return;
+  const save = (): void => {
+    if (!f.agentId || !prop) { toast.error("Choose the agent and the property"); return; }
+    if (f.buyerName.trim().length < 2) { toast.error("Enter the buyer's name"); return; }
+    if (f.price <= 0) { toast.error("Enter the agreed price"); return; }
+    if (f.amountPaid < 0 || f.amountPaid > f.price) { toast.error("Amount paid must be between ₦0 and the agreed price"); return; }
+    if (!confirm(`Record sale of ${prop.ref} for ${formatNaira(f.price)}? The property will be marked Sold.`)) { return; }
     const sale = actions.recordSale({ ...f, buyerName: f.buyerName.trim(), propertyRef: prop.ref, propertyTitle: prop.title });
     toast.success(`Sale recorded — receipt ${sale.receiptNo}`);
     onDone();

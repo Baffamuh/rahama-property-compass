@@ -25,13 +25,13 @@ export interface Property {
   featured: boolean;
   createdAt: string;
   /** Map boundary corners [lat, lng]. Estimate only — not a certified survey. */
-  boundary?: [number, number][];
-  mapAreaSqm?: number;
+  boundary?: [number, number][] | undefined;
+  mapAreaSqm?: number | undefined;
   areaDisplayUnit?: "sqft" | "sqm" | "plots" | "hectares" | "acres";
   /** Verified area from a licensed surveyor, recorded separately. */
-  surveyAreaSqm?: number;
-  surveyRef?: string;
-  surveySource?: string;
+  surveyAreaSqm?: number | undefined;
+  surveyRef?: string | undefined;
+  surveySource?: string | undefined;
 }
 
 export interface Enquiry {
@@ -71,8 +71,8 @@ export interface Agent {
   code: string;
   name: string;
   phone: string;
-  email?: string;
-  zoneId?: string;
+  email?: string | undefined;
+  zoneId?: string | undefined;
   active: boolean;
   joinedAt: string;
 }

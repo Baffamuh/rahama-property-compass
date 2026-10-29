@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import { compressImage } from "@/lib/image-upload";
 import { actions, useStore } from "@/lib/store";
 import { formatNaira, formatSize, slugify } from "@/lib/format";
 import { AREAS, IMAGES } from "@/lib/sample-data";
@@ -92,7 +93,7 @@ function AdminProperties() {
 function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew: boolean; existing: Property[]; onDone: () => void }) {
   const [p, setP] = useState<Property>(initial);
   const [feature, setFeature] = useState("");
-  const [imgUrl, setImgUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const zones = useStore((s) => s.zones);
   const legacy = findArea(zones, p.area);
   const zone = zones.find((z) => z.id === p.zoneId) ?? legacy?.zone;
@@ -170,9 +171,23 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Add from library:</p>
-          <div className="flex gap-2">{LIBRARY.map((img) => <button key={img} onClick={() => set("images", [...p.images, img])} className="opacity-80 hover:opacity-100"><img src={img} alt="" className="h-12 w-16 rounded object-cover" /></button>)}</div>
-          <div className="flex gap-2"><Input placeholder="…or paste an image URL (https://)" value={imgUrl} onChange={(e) => setImgUrl(e.target.value)} /><Button type="button" variant="outline" onClick={() => { if (/^https:\/\//.test(imgUrl)) { set("images", [...p.images, imgUrl]); setImgUrl(""); } else toast.error("Use an https:// link"); }}>Add</Button></div>
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-sm font-semibold text-primary hover:bg-primary/10">
+            <Upload className="h-4 w-4" />{uploading ? "Processing photos…" : "Upload photos from device / camera"}
+            <input type="file" accept="image/*" multiple className="sr-only" disabled={uploading} onChange={async (e) => {
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = "";
+              if (!files.length) return;
+              setUploading(true);
+              try {
+                const out = await Promise.all(files.map(compressImage));
+                setP((x) => ({ ...x, images: [...x.images, ...out] }));
+                toast.success(`${out.length} photo${out.length > 1 ? "s" : ""} added`);
+              } catch { toast.error("Could not read one of the photos"); }
+              finally { setUploading(false); }
+            }} />
+          </label>
+          <p className="text-xs text-muted-foreground">Photos are resized automatically so pages load fast. Or pick a sample:</p>
+          <div className="flex gap-2">{LIBRARY.map((img) => <button type="button" key={img} onClick={() => set("images", [...p.images, img])} className="opacity-80 hover:opacity-100"><img src={img} alt="" className="h-12 w-16 rounded object-cover" /></button>)}</div>
         </div>
         <div className="sm:col-span-2"><MeasurementEditor p={p} onChange={(patch) => setP((x) => ({ ...x, ...patch }))} /></div>
         <label className="flex items-center gap-3 sm:col-span-2"><Switch checked={p.featured} onCheckedChange={(v) => set("featured", v)} />Feature on homepage</label>

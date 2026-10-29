@@ -52,7 +52,34 @@ function AdminProperties() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-card">
+      <div className="space-y-3 md:hidden">
+        {list.map((p) => (
+          <div key={p.id} className="rounded-xl border bg-card p-3">
+            <div className="flex min-w-0 gap-3">
+              <img src={p.images[0]} alt="" className="h-16 w-20 shrink-0 rounded object-cover" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium leading-tight">{p.title}</p>
+                <p className="font-mono text-xs text-muted-foreground">{p.ref}</p>
+                <p className="mt-1 text-sm font-semibold">{formatNaira(p.price)}</p>
+                <p className="text-xs text-muted-foreground">{p.type} · {formatSize(p.size, p.sizeUnit)}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <Select value={p.status} onValueChange={(v) => { actions.setStatus(p.id, v as PropertyStatus); toast.success(`${p.ref} set to ${v}`); }}>
+                <SelectTrigger className="h-9 w-36" aria-label="Change status"><StatusBadge status={p.status} /></SelectTrigger>
+                <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setEditing(p)}><Pencil className="h-4 w-4" />Edit</Button>
+                <Button size="icon" variant="ghost" aria-label="Delete" onClick={() => { if (confirm(`Delete ${p.title}?`)) { actions.deleteProperty(p.id); toast.success("Listing deleted"); } }}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+              </div>
+            </div>
+          </div>
+        ))}
+        {list.length === 0 && <p className="p-10 text-center text-muted-foreground">No listings match.</p>}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-xl border bg-card md:block">
         <table className="w-full min-w-[760px] text-sm">
           <thead className="border-b bg-muted/50 text-left text-xs uppercase text-muted-foreground">
             <tr><th className="p-3">Property</th><th className="p-3">Type</th><th className="p-3">Price</th><th className="p-3">Size</th><th className="p-3">Status</th><th className="p-3 text-right">Actions</th></tr>
@@ -82,7 +109,7 @@ function AdminProperties() {
       </div>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+        <DialogContent className="max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] overflow-y-auto overflow-x-hidden p-4 sm:max-w-3xl sm:p-6">
           {editing && <Editor initial={editing} isNew={!properties.some((p) => p.id === editing.id)} existing={properties} onDone={() => setEditing(null)} />}
         </DialogContent>
       </Dialog>

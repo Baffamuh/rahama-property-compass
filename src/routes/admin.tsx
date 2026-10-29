@@ -48,7 +48,7 @@ function AdminLayout() {
         </div>
       </aside>
       {open && <div className="fixed inset-0 z-30 bg-foreground/40 md:hidden" onClick={() => setOpen(false)} />}
-      <div className="flex-1 md:ml-60 print:ml-0">
+      <div className="min-w-0 flex-1 md:ml-60 print:ml-0">
         <header className="no-print flex h-14 items-center border-b bg-background px-4 md:hidden">
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Open menu"><Menu /></Button>
           <span className="ml-2 font-display font-bold">Rahama Hub</span>

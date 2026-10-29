@@ -39,7 +39,7 @@ function set(next: State) {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
   } catch {
-    /* ignore */
+    void import("sonner").then(({ toast }) => toast.error("Browser storage is full — remove some photos. Changes may not be kept after reload."));
   }
   listeners.forEach((l) => l());
 }

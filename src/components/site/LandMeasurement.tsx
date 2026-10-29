@@ -3,6 +3,7 @@ import { ClientOnly } from "@tanstack/react-router";
 import { AlertTriangle, BadgeCheck, Crosshair, LocateFixed, Trash2, Undo2 } from "lucide-react";
 import { formatArea, polygonAreaSqm, validateBoundary, type AreaUnit, type LatLng } from "@/lib/measurements";
 import type { Property } from "@/lib/types";
+import { GpsWalk } from "@/components/site/GpsWalk";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +37,8 @@ export function MeasurementEditor({ p, onChange }: { p: Property; onChange: (pat
           <Button type="button" size="sm" variant="outline" disabled={!points.length} onClick={() => { if (confirm("Clear all boundary points?")) update([]); }}><Trash2 className="h-3.5 w-3.5" />Clear</Button>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">Tap the map at each corner of the land in order. Tap a numbered point to remove it. Map opens on Azare Central.</p>
+      <GpsWalk onFinish={update} />
+      <p className="text-xs text-muted-foreground">Or tap the map at each corner of the land in order. Tap a numbered point to remove it. Map opens on Azare Central.</p>
       <ClientOnly fallback={<Skeleton h={340} />}><Suspense fallback={<Skeleton h={340} />}><BoundaryMap points={points} onChange={update} height={340} /></Suspense></ClientOnly>
       {error ? <p className="flex items-center gap-1 text-sm text-destructive"><AlertTriangle className="h-4 w-4" />{error}</p> : points.length > 2 && (
         <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-5">

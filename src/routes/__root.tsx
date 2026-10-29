@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" },
       { title: "Rahama Land & Property — Azare, Bauchi State" },
       { name: "description", content: "Land plots and houses for sale in Azare and Bauchi by Rahama Land and Property Development Ltd." },
       { property: "og:type", content: "website" },

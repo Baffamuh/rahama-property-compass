@@ -1,5 +1,5 @@
 /** Resize + re-encode a device photo in the browser (no server, ₦0). Returns a data URL. */
-export async function compressImage(file: File, maxSide = 1600, quality = 0.78): Promise<string> {
+export async function compressImage(file: File, maxSide = 1280, quality = 0.7): Promise<string> {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((res, rej) => {

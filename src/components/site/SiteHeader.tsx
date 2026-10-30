@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, Phone, X } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/rahama-logo.png.asset.json";
+import logo from "@/assets/rahama-logo.png";
 import { COMPANY } from "@/lib/format";
 
 const nav = [
@@ -15,7 +15,7 @@ const nav = [
 export function Logo({ className = "h-11" }: { className?: string }) {
   return (
     <Link to="/" className="flex items-center gap-2">
-      <img src={logo.url} alt="Rahama Land and Property logo" className={`${className} w-auto rounded-md`} />
+      <img src={logo} alt="Rahama Land and Property logo" className={`${className} w-auto rounded-md`} />
     </Link>
   );
 }

@@ -8,7 +8,7 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // On Vercel (VERCEL=1 is set by Vercel's build), emit Vercel's serverless output
 // instead of the default Cloudflare worker. Lovable builds ignore this and keep their own target.
-const onVercel = !!process.env.VERCEL;
+const onVercel = !!process.env['VERCEL'];
 
 export default defineConfig({
   tanstackStart: {

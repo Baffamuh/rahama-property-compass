@@ -206,7 +206,7 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
               if (!files.length) return;
               setUploading(true);
               try {
-                const out = await Promise.all(files.map(compressImage));
+                const out = await Promise.all(files.map((f) => compressImage(f)));
                 setP((x) => ({ ...x, images: [...x.images, ...out] }));
                 toast.success(`${out.length} photo${out.length > 1 ? "s" : ""} added`);
               } catch { toast.error("Could not read one of the photos"); }

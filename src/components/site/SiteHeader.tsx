@@ -7,6 +7,7 @@ import { COMPANY } from "@/lib/format";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/properties", label: "Properties" },
+  { to: "/zones", label: "Zones" },
   { to: "/services", label: "Services" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },

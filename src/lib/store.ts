@@ -147,15 +147,4 @@ function editSub(zoneId: string, subId: string, fn: (s: SubZone) => SubZone) {
   editZone(zoneId, (z) => ({ ...z, subZones: z.subZones.map((s) => (s.id === subId ? fn(s) : s)) }));
 }
 
-// --- Demo admin session (placeholder until real sign-in is connected) ---
-const AUTH_KEY = "rahama-admin";
-export const DEMO_ADMIN = { email: "admin@rahamaproperty.ng", password: "rahama2026" };
-export const auth = {
-  isSignedIn: () => typeof window !== "undefined" && sessionStorage.getItem(AUTH_KEY) === "1",
-  signIn(email: string, password: string) {
-    const ok = email.trim().toLowerCase() === DEMO_ADMIN.email && password === DEMO_ADMIN.password;
-    if (ok) sessionStorage.setItem(AUTH_KEY, "1");
-    return ok;
-  },
-  signOut: () => sessionStorage.removeItem(AUTH_KEY),
-};
+

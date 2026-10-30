@@ -1,13 +1,14 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Trophy, Menu } from "lucide-react";
 import { useState } from "react";
-import { auth } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
+import { isAdmin } from "@/lib/admin-auth";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
-  beforeLoad: () => {
-    if (!auth.isSignedIn()) throw redirect({ to: "/admin/login" });
+  beforeLoad: async () => {
+    if (!(await isAdmin())) throw redirect({ to: "/admin/login" });
   },
   head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
   component: AdminLayout,
@@ -24,7 +25,7 @@ const nav = [
 function AdminLayout() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const signOut = () => { auth.signOut(); navigate({ to: "/admin/login", replace: true }); };
+  const signOut = async () => { await supabase.auth.signOut(); navigate({ to: "/admin/login", replace: true }); };
 
   const links = (
     <nav className="space-y-1">

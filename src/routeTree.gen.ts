@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAgentsRouteImport } from './routes/admin.agents'
@@ -23,6 +24,8 @@ import { Route as AdminPropertiesRouteImport } from './routes/admin.properties'
 import { Route as AdminLoginRouteImport } from './routes/admin_.login'
 import { Route as PropertiesIndexRouteImport } from './routes/properties.index'
 import { Route as PropertiesSlugRouteImport } from './routes/properties.$slug'
+import { Route as ZonesIndexRouteImport } from './routes/zones.index'
+import { Route as ZonesZoneIdRouteImport } from './routes/zones.$zoneId'
 import { Route as AdminReceiptIdRouteImport } from './routes/admin.receipt.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -48,6 +51,11 @@ const ContactRoute = ContactRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -95,6 +103,16 @@ const PropertiesSlugRoute = PropertiesSlugRouteImport.update({
   path: '/properties/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZonesIndexRoute = ZonesIndexRouteImport.update({
+  id: '/zones/',
+  path: '/zones/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZonesZoneIdRoute = ZonesZoneIdRouteImport.update({
+  id: '/zones/$zoneId',
+  path: '/zones/$zoneId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminReceiptIdRoute = AdminReceiptIdRouteImport.update({
   id: '/receipt/$id',
   path: '/receipt/$id',
@@ -107,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/enquiries': typeof AdminEnquiriesRoute
@@ -114,8 +133,10 @@ export interface FileRoutesByFullPath {
   '/admin/properties': typeof AdminPropertiesRoute
   '/admin/login': typeof AdminLoginRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
+  '/zones/': typeof ZonesIndexRoute
   '/admin/receipt/$id': typeof AdminReceiptIdRoute
 }
 export interface FileRoutesByTo {
@@ -123,6 +144,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/enquiries': typeof AdminEnquiriesRoute
@@ -130,8 +152,10 @@ export interface FileRoutesByTo {
   '/admin/properties': typeof AdminPropertiesRoute
   '/admin/login': typeof AdminLoginRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/admin': typeof AdminIndexRoute
   '/properties': typeof PropertiesIndexRoute
+  '/zones': typeof ZonesIndexRoute
   '/admin/receipt/$id': typeof AdminReceiptIdRoute
 }
 export interface FileRoutesById {
@@ -141,6 +165,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
   '/admin/agents': typeof AdminAgentsRoute
   '/admin/enquiries': typeof AdminEnquiriesRoute
@@ -148,8 +173,10 @@ export interface FileRoutesById {
   '/admin/properties': typeof AdminPropertiesRoute
   '/admin_/login': typeof AdminLoginRoute
   '/properties/$slug': typeof PropertiesSlugRoute
+  '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/admin/': typeof AdminIndexRoute
   '/properties/': typeof PropertiesIndexRoute
+  '/zones/': typeof ZonesIndexRoute
   '/admin/receipt/$id': typeof AdminReceiptIdRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/privacy'
+    | '/reset-password'
     | '/services'
     | '/admin/agents'
     | '/admin/enquiries'
@@ -167,8 +195,10 @@ export interface FileRouteTypes {
     | '/admin/properties'
     | '/admin/login'
     | '/properties/$slug'
+    | '/zones/$zoneId'
     | '/admin/'
     | '/properties/'
+    | '/zones/'
     | '/admin/receipt/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +206,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/privacy'
+    | '/reset-password'
     | '/services'
     | '/admin/agents'
     | '/admin/enquiries'
@@ -183,8 +214,10 @@ export interface FileRouteTypes {
     | '/admin/properties'
     | '/admin/login'
     | '/properties/$slug'
+    | '/zones/$zoneId'
     | '/admin'
     | '/properties'
+    | '/zones'
     | '/admin/receipt/$id'
   id:
     | '__root__'
@@ -193,6 +226,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contact'
     | '/privacy'
+    | '/reset-password'
     | '/services'
     | '/admin/agents'
     | '/admin/enquiries'
@@ -200,8 +234,10 @@ export interface FileRouteTypes {
     | '/admin/properties'
     | '/admin_/login'
     | '/properties/$slug'
+    | '/zones/$zoneId'
     | '/admin/'
     | '/properties/'
+    | '/zones/'
     | '/admin/receipt/$id'
   fileRoutesById: FileRoutesById
 }
@@ -211,10 +247,13 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
   PrivacyRoute: typeof PrivacyRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   PropertiesSlugRoute: typeof PropertiesSlugRoute
+  ZonesZoneIdRoute: typeof ZonesZoneIdRoute
   PropertiesIndexRoute: typeof PropertiesIndexRoute
+  ZonesIndexRoute: typeof ZonesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -317,6 +363,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zones/': {
+      id: '/zones/'
+      path: '/zones'
+      fullPath: '/zones/'
+      preLoaderRoute: typeof ZonesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zones/$zoneId': {
+      id: '/zones/$zoneId'
+      path: '/zones/$zoneId'
+      fullPath: '/zones/$zoneId'
+      preLoaderRoute: typeof ZonesZoneIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/receipt/$id': {
       id: '/admin/receipt/$id'
       path: '/receipt/$id'
@@ -353,10 +413,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
   PrivacyRoute: PrivacyRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
   AdminLoginRoute: AdminLoginRoute,
   PropertiesSlugRoute: PropertiesSlugRoute,
+  ZonesZoneIdRoute: ZonesZoneIdRoute,
   PropertiesIndexRoute: PropertiesIndexRoute,
+  ZonesIndexRoute: ZonesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

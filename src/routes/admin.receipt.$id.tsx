@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Printer } from "lucide-react";
-import logo from "@/assets/rahama-logo.png.asset.json";
+import logo from "@/assets/rahama-logo.png";
 import { useStore } from "@/lib/store";
 import { COMPANY, formatNaira } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ function ReceiptPage() {
         {sale.status === "Cancelled" && <div className="pointer-events-none absolute inset-0 flex items-center justify-center"><span className="-rotate-12 rounded-lg border-4 border-destructive px-6 py-2 text-5xl font-black text-destructive/70">CANCELLED</span></div>}
         <header className="flex flex-col gap-4 border-b-4 border-primary pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <img src={logo.url} alt="Rahama logo" className="h-16 w-auto" />
+            <img src={logo} alt="Rahama logo" className="h-16 w-auto" />
             <div>
               <p className="font-display text-lg font-bold text-primary">{COMPANY.name}</p>
               <p className="text-xs">RC NO. {COMPANY.rc}</p>

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock } from "lucide-react";
-import logo from "@/assets/rahama-logo.png.asset.json";
+import logo from "@/assets/rahama-logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,7 @@ function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-primary px-4">
       <div className="w-full max-w-sm rounded-2xl bg-card p-8 shadow-2xl">
-        <img src={logo.url} alt="Rahama logo" className="mx-auto h-16 rounded-md" />
+        <img src={logo} alt="Rahama logo" className="mx-auto h-16 rounded-md" />
         <h1 className="mt-6 text-center text-2xl font-bold">Admin portal</h1>
         <p className="text-center text-sm text-muted-foreground">Sign in to manage listings and enquiries</p>
         <form onSubmit={submit} className="mt-6 space-y-4">

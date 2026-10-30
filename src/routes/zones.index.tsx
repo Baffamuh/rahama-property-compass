@@ -21,7 +21,7 @@ export const Route = createFileRoute("/zones/")({
 
 function ZonesPage() {
   const zones = useStore((s) => s.zones);
-  const properties = useStore((s) => s.properties).filter(isPublic);
+  const properties = useStore((s) => s.properties).filter((p) => isPublic(p.status));
   return (
     <PublicLayout>
       <PageHero eyebrow="Browse by zone" title="Find property in your preferred zone" subtitle="Every listing is grouped by zone. Pick one to see all properties there." />

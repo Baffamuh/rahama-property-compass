@@ -39,7 +39,7 @@ function ZonePage() {
     );
   }
 
-  const inZone = all.filter(isPublic).filter((p) => zoneOfProperty(zones, p) === zone.id);
+  const inZone = all.filter((p) => isPublic(p.status)).filter((p) => zoneOfProperty(zones, p) === zone.id);
   const list = sub ? inZone.filter((p) => subZoneOfProperty(zones, p) === sub) : inZone;
   const chip = (active: boolean) => `shrink-0 rounded-full border px-4 py-2 text-sm font-medium ${active ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`;
 

@@ -13,6 +13,7 @@ export function SiteFooter() {
         <div className="space-y-2 text-sm">
           <h4 className="font-semibold text-accent">Explore</h4>
           <Link to="/properties" className="block opacity-80 hover:opacity-100">Properties</Link>
+          <Link to="/zones" className="block opacity-80 hover:opacity-100">Browse by zone</Link>
           <Link to="/services" className="block opacity-80 hover:opacity-100">Services</Link>
           <Link to="/about" className="block opacity-80 hover:opacity-100">About us</Link>
           <Link to="/privacy" className="block opacity-80 hover:opacity-100">Privacy & disclaimer</Link>

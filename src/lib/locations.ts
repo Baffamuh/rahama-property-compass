@@ -41,3 +41,11 @@ export function findArea(zones: Zone[], area: string) {
   for (const z of zones) for (const s of z.subZones) if (s.areas.includes(area)) return { zone: z, subZone: s };
   return null;
 }
+
+/** Zone a property belongs to: its saved zone, else the zone of its area. */
+export function zoneOfProperty(zones: Zone[], p: { zoneId?: string | undefined; area: string }): string | undefined {
+  return p.zoneId ?? findArea(zones, p.area)?.zone.id;
+}
+export function subZoneOfProperty(zones: Zone[], p: { subZoneId?: string | undefined; area: string }): string | undefined {
+  return p.subZoneId ?? findArea(zones, p.area)?.subZone.id;
+}

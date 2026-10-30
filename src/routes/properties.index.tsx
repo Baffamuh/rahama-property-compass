@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore } from "@/lib/store";
 import { isPublic } from "@/lib/format";
-import { areasOf, findArea, townsOf } from "@/lib/locations";
+import { areasOf, townsOf, zoneOfProperty } from "@/lib/locations";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -52,7 +52,7 @@ function Catalogue() {
         if (s.type && p.type !== s.type) return false;
         if (s.location && p.location !== s.location) return false;
         if (s.area && p.area !== s.area) return false;
-        if (s.zone && findArea(zones, p.area)?.zone.id !== s.zone) return false;
+        if (s.zone && zoneOfProperty(zones, p) !== s.zone) return false;
         if (s.unit && p.sizeUnit !== s.unit) return false;
         if (s.min != null && p.price < s.min) return false;
         if (s.max != null && p.price > s.max) return false;

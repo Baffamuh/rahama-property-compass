@@ -1,5 +1,7 @@
-export type PropertyType = "Residential Land" | "Commercial Land" | "House/Villa";
-export type PropertyStatus = "Draft" | "Published" | "Reserved" | "Sold" | "Archived";
+export type PropertyType = "Residential Land" | "Commercial Land" | "House/Villa" | "Shop" | "Farm";
+export type ListingKind = "Sale" | "Rent";
+export type RentPeriod = "month" | "year";
+export type PropertyStatus = "Draft" | "Published" | "Reserved" | "Sold" | "Rented" | "Archived";
 export type SizeUnit = "plots" | "sqm" | "hectares";
 export type EnquiryStatus = "New" | "Contacted" | "Viewing Scheduled" | "Closed";
 
@@ -9,6 +11,9 @@ export interface Property {
   ref: string;
   title: string;
   type: PropertyType;
+  /** For Sale (default) or For Rent. */
+  listing?: ListingKind;
+  rentPeriod?: RentPeriod;
   status: PropertyStatus;
   location: string;
   area: string;
@@ -63,6 +68,7 @@ export interface Zone {
   id: string;
   name: string;
   town: string;
+  order?: number;
   subZones: SubZone[];
 }
 

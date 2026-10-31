@@ -98,8 +98,9 @@ export const actions = {
   async addEnquiry(e: Omit<Enquiry, "id" | "status" | "notes" | "createdAt">) {
     const enquiry: Enquiry = { ...e, id: uid(), status: "New", notes: "", createdAt: new Date().toISOString() };
     const { error } = await supabase.from("app_records").insert({ collection: "enquiries", id: enquiry.id, data: enquiry as unknown as Json });
-    if (error) { notify("Your message could not be sent. Please call or WhatsApp us."); throw error; }
+    if (error) { notify("Your message could not be sent. Please call or WhatsApp us."); return false; }
     setState({ ...state, enquiries: [enquiry, ...state.enquiries] });
+    return true;
   },
   updateEnquiry(id: string, patch: Partial<Enquiry>) {
     const enquiries = state.enquiries.map((x) => (x.id === id ? { ...x, ...patch } : x));

@@ -43,6 +43,7 @@ function Catalogue() {
   const navigate = useNavigate({ from: "/properties/" });
   const properties = useStore((st) => st.properties);
   const zones = useStore((st) => st.zones);
+  const ready = useStore((st) => st.ready);
   const [showFilters, setShowFilters] = useState(false);
   const activeCount = [s.type, s.listing, s.location, s.zone, s.area, s.unit, s.min, s.max].filter((v) => v != null).length;
   const setS = (patch: Partial<typeof s>) => navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
@@ -109,10 +110,12 @@ function Catalogue() {
           <span className="flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />{list.length} {list.length === 1 ? "property" : "properties"} found</span>
           <Button variant="ghost" size="sm" disabled={!activeCount && !s.q} onClick={() => navigate({ search: {}, replace: true })}>Clear filters</Button>
         </div>
-        {list.length === 0 ? (
-          <div className="mt-10 rounded-xl border border-dashed p-16 text-center">
-            <p className="text-lg font-semibold">No properties match these filters.</p>
-            <p className="text-muted-foreground">Try widening your budget or location.</p>
+        {!ready ? (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />)}</div>
+        ) : list.length === 0 ? (
+          <div className="mt-10 rounded-xl border border-dashed p-10 text-center sm:p-16">
+            <p className="text-lg font-semibold">{properties.some((p) => isPublic(p.status)) ? "No properties match these filters." : "New listings are coming soon."}</p>
+            <p className="text-muted-foreground">{properties.some((p) => isPublic(p.status)) ? "Try widening your budget or location." : "Call or WhatsApp us — we have more land and homes than are listed online."}</p>
           </div>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

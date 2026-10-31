@@ -15,6 +15,13 @@
       "when": 1793424181273,
       "tag": "0001_app_records_and_photo_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793424200626,
+      "tag": "0002_admin_read_property_photos",
+      "breakpoints": true
     }
   ]
 }

@@ -57,7 +57,7 @@ export function GpsWalk({ onProgress, onFinish }: { onProgress: (points: LatLng[
   const finish = () => {
     stopWatch(); setWalking(false);
     const invalid = validateBoundary(live.current);
-    if (invalid) { setErr(`Walk a bit more of the boundary first. ${invalid}`); return; }
+    if (invalid) { setErr(`Walk a bit more of the boundary first. ${invalid}`); live.current = []; setPoints([]); onProgress([]); return; }
     onFinish(live.current);
   };
 

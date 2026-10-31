@@ -52,3 +52,28 @@ export function formatArea(sqm: number, unit: AreaUnit): string {
   const digits = unit === "sqft" || unit === "sqm" ? 0 : 2;
   return `${v.toLocaleString("en-NG", { maximumFractionDigits: digits, minimumFractionDigits: digits })} ${UNIT_LABEL[unit]}`;
 }
+
+export const FT_PER_M = 3.28084;
+
+/** Straight-line ground distance between two points in metres (haversine). */
+export function distanceM(a: LatLng, b: LatLng): number {
+  const dLat = rad(b[0] - a[0]), dLng = rad(b[1] - a[1]);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+/** Length of each side of the closed boundary, in feet (side i runs from point i to point i+1). */
+export function sideLengthsFt(points: LatLng[]): number[] {
+  if (points.length < 2) return [];
+  return points.map((p, i) => distanceM(p, points[(i + 1) % points.length]!) * FT_PER_M).slice(0, points.length < 3 ? 1 : points.length);
+}
+
+export function perimeterFt(points: LatLng[]): number {
+  return points.length < 3 ? 0 : sideLengthsFt(points).reduce((a, b) => a + b, 0);
+}
+
+/** Size to auto-fill on the listing from a measured area. */
+export function sizeFromArea(sqm: number, unit: "plots" | "sqm" | "hectares"): number {
+  const v = unit === "plots" ? sqm / PLOT_SQM : unit === "hectares" ? sqm / SQM_PER_HECTARE : sqm;
+  return Math.round(v * 100) / 100;
+}

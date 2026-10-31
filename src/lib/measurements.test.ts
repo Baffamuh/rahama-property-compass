@@ -23,3 +23,31 @@ describe("land measurement", () => {
     expect(validateBoundary([[11, 10], [11, 10], [11.001, 10.001]])).not.toBeNull();
   });
 });
+
+import { perimeterFt, sideLengthsFt, simplifyBoundary, sizeFromArea } from "./measurements";
+
+describe("walk-the-field measurements", () => {
+  // One standard plot: 50 ft wide x 100 ft long near Azare Central.
+  const ftToLat = (ft: number) => ft / 3.28084 / 111320;
+  const ftToLng = (ft: number) => ft / 3.28084 / (111320 * Math.cos((11.6738 * Math.PI) / 180));
+  const plot: LatLng[] = [[11.6738, 10.1878], [11.6738, 10.1878 + ftToLng(50)], [11.6738 + ftToLat(100), 10.1878 + ftToLng(50)], [11.6738 + ftToLat(100), 10.1878]];
+
+  it("reports each side of a 50x100 ft plot in feet", () => {
+    const sides = sideLengthsFt(plot);
+    expect(sides[0]).toBeCloseTo(50, 0);
+    expect(sides[1]).toBeCloseTo(100, 0);
+    expect(perimeterFt(plot)).toBeCloseTo(300, 0);
+  });
+  it("auto-fills 1 plot for a 50x100 ft boundary", () => {
+    expect(sizeFromArea(polygonAreaSqm(plot), "plots")).toBeCloseTo(1, 1);
+  });
+  it("reduces a walked track back to its 4 corners", () => {
+    const track: LatLng[] = [];
+    for (let i = 0; i < 4; i++) {
+      const a = plot[i]!, b = plot[(i + 1) % 4]!;
+      for (let t = 0; t < 10; t++) track.push([a[0] + ((b[0] - a[0]) * t) / 10, a[1] + ((b[1] - a[1]) * t) / 10]);
+    }
+    track.push(plot[0]!);
+    expect(simplifyBoundary(track)).toHaveLength(4);
+  });
+});

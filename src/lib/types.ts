@@ -12,8 +12,8 @@ export interface Property {
   title: string;
   type: PropertyType;
   /** For Sale (default) or For Rent. */
-  listing?: ListingKind;
-  rentPeriod?: RentPeriod;
+  listing?: ListingKind | undefined;
+  rentPeriod?: RentPeriod | undefined;
   status: PropertyStatus;
   location: string;
   area: string;

@@ -4,7 +4,7 @@ import L from "leaflet";
 import { AZARE_CENTRAL, distanceM, FT_PER_M, type LatLng } from "@/lib/measurements";
 
 /** `track`: live GPS walk — draws the walked line and follows the walker. */
-export default function BoundaryMap({ points, onChange, readOnly = false, track = false, height = 360 }: { points: LatLng[]; onChange?: (p: LatLng[]) => void; readOnly?: boolean; track?: boolean; height?: number }) {
+export default function BoundaryMap({ points, onChange, readOnly = false, track = false, height = 360 }: { points: LatLng[]; onChange?: ((p: LatLng[]) => void) | undefined; readOnly?: boolean; track?: boolean; height?: number }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layer = useRef<L.LayerGroup | null>(null);

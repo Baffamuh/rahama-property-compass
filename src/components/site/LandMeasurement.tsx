@@ -37,7 +37,7 @@ export function MeasurementEditor({ p, onChange }: { p: Property; onChange: (pat
     const wf = Number(w), lf = Number(l);
     if (!(wf > 0 && lf > 0)) return;
     const sqm = (wf * lf) / 10.7639104;
-    onChange({ mapAreaSqm: undefined, surveyAreaSqm: p.surveyAreaSqm, size: sizeFromArea(sqm, p.sizeUnit === "hectares" ? "hectares" : p.sizeUnit === "sqm" ? "sqm" : "plots"), ...(p.sizeUnit === "hectares" || p.sizeUnit === "sqm" ? {} : { sizeUnit: "plots" as const }) });
+    onChange({ size: sizeFromArea(sqm, p.sizeUnit === "hectares" ? "hectares" : p.sizeUnit === "sqm" ? "sqm" : "plots"), ...(p.sizeUnit === "hectares" || p.sizeUnit === "sqm" ? {} : { sizeUnit: "plots" as const }) });
   };
 
   return (

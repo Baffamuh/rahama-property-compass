@@ -33,5 +33,10 @@ export function slugify(s: string): string {
 }
 
 export function isPublic(status: Property["status"]): boolean {
-  return status === "Published" || status === "Reserved" || status === "Sold";
+  return status === "Published" || status === "Reserved" || status === "Sold" || status === "Rented";
+}
+
+/** Price label, e.g. "₦2,500,000" or "₦600,000 / year" for rentals. */
+export function formatPrice(p: Pick<Property, "price" | "listing" | "rentPeriod">): string {
+  return p.listing === "Rent" ? `${formatNaira(p.price)} / ${p.rentPeriod ?? "year"}` : formatNaira(p.price);
 }

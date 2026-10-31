@@ -14,6 +14,7 @@ import { areasOf, townsOf, zoneOfProperty } from "@/lib/locations";
 const searchSchema = z.object({
   q: z.string().optional(),
   type: z.string().optional(),
+  listing: z.enum(["Sale", "Rent"]).optional(),
   location: z.string().optional(),
   area: z.string().optional(),
   zone: z.string().optional(),
@@ -26,10 +27,12 @@ export const Route = createFileRoute("/properties/")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Properties for Sale in Azare & Bauchi — Rahama Land & Property" },
-      { name: "description", content: "Browse residential land, commercial land and houses for sale in Azare and Bauchi State. Filter by type, area, price and size." },
-      { property: "og:title", content: "Properties for Sale — Rahama Land & Property" },
-      { property: "og:description", content: "Land plots and houses in Azare and Bauchi State." },
+      { title: "Land, Houses, Shops & Farms for Sale or Rent — Rahama Land & Property" },
+      { name: "description", content: "Buy or rent residential and commercial land, houses, shops and farms in Azare and Bauchi State. Filter by zone, type, price and size." },
+      { property: "og:title", content: "Properties for Sale & Rent — Rahama Land & Property" },
+      { property: "og:description", content: "Land, houses, shops and farms in Azare and Bauchi State." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Catalogue,
@@ -40,8 +43,9 @@ function Catalogue() {
   const navigate = useNavigate({ from: "/properties/" });
   const properties = useStore((st) => st.properties);
   const zones = useStore((st) => st.zones);
+  const ready = useStore((st) => st.ready);
   const [showFilters, setShowFilters] = useState(false);
-  const activeCount = [s.type, s.location, s.zone, s.area, s.unit, s.min, s.max].filter((v) => v != null).length;
+  const activeCount = [s.type, s.listing, s.location, s.zone, s.area, s.unit, s.min, s.max].filter((v) => v != null).length;
   const setS = (patch: Partial<typeof s>) => navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
   const list = useMemo(
@@ -50,6 +54,7 @@ function Catalogue() {
         if (!isPublic(p.status)) return false;
         if (s.q && !`${p.title} ${p.ref} ${p.area}`.toLowerCase().includes(s.q.toLowerCase())) return false;
         if (s.type && p.type !== s.type) return false;
+        if (s.listing && (p.listing ?? "Sale") !== s.listing) return false;
         if (s.location && p.location !== s.location) return false;
         if (s.area && p.area !== s.area) return false;
         if (s.zone && zoneOfProperty(zones, p) !== s.zone) return false;
@@ -73,7 +78,7 @@ function Catalogue() {
 
   return (
     <PublicLayout>
-      <PageHero eyebrow="Property catalogue" title="Land & homes for sale" subtitle="Verified listings across Azare and Bauchi State." />
+      <PageHero eyebrow="Property catalogue" title="Land, homes, shops & farms" subtitle="Buy or rent — verified listings across Azare and Bauchi State." />
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="flex gap-2">
           <Input className="h-12 flex-1" placeholder="Search title, area or ref…" value={s.q ?? ""} onChange={(e) => setS({ q: e.target.value || undefined })} />
@@ -81,8 +86,13 @@ function Catalogue() {
             <SlidersHorizontal className="h-4 w-4" />Filters{activeCount ? ` (${activeCount})` : ""}
           </Button>
         </div>
+        <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl bg-muted p-1 sm:max-w-md">
+          {([[undefined, "All"], ["Sale", "For Sale"], ["Rent", "For Rent"]] as const).map(([v, l]) => (
+            <button key={l} onClick={() => setS({ listing: v })} className={`rounded-lg px-3 py-2 text-sm font-semibold ${s.listing === v ? "bg-background text-primary shadow-sm" : "text-muted-foreground"}`}>{l}</button>
+          ))}
+        </div>
         <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
-          {([[undefined, "All"], ["Residential Land", "Residential"], ["Commercial Land", "Commercial"], ["House/Villa", "Houses"]] as const).map(([v, l]) => (
+          {([[undefined, "All types"], ["Residential Land", "Residential land"], ["Commercial Land", "Commercial land"], ["House/Villa", "Houses"], ["Shop", "Shops"], ["Farm", "Farms"]] as const).map(([v, l]) => (
             <button key={l} onClick={() => setS({ type: v })} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium ${s.type === v ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}>{l}</button>
           ))}
         </div>
@@ -100,10 +110,12 @@ function Catalogue() {
           <span className="flex items-center gap-2"><SlidersHorizontal className="h-4 w-4" />{list.length} {list.length === 1 ? "property" : "properties"} found</span>
           <Button variant="ghost" size="sm" disabled={!activeCount && !s.q} onClick={() => navigate({ search: {}, replace: true })}>Clear filters</Button>
         </div>
-        {list.length === 0 ? (
-          <div className="mt-10 rounded-xl border border-dashed p-16 text-center">
-            <p className="text-lg font-semibold">No properties match these filters.</p>
-            <p className="text-muted-foreground">Try widening your budget or location.</p>
+        {!ready ? (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="aspect-[4/3] animate-pulse rounded-xl bg-muted" />)}</div>
+        ) : list.length === 0 ? (
+          <div className="mt-10 rounded-xl border border-dashed p-10 text-center sm:p-16">
+            <p className="text-lg font-semibold">{properties.some((p) => isPublic(p.status)) ? "No properties match these filters." : "New listings are coming soon."}</p>
+            <p className="text-muted-foreground">{properties.some((p) => isPublic(p.status)) ? "Try widening your budget or location." : "Call or WhatsApp us — we have more land and homes than are listed online."}</p>
           </div>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

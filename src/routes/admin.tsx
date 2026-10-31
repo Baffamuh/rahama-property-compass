@@ -3,12 +3,14 @@ import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Trophy, M
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdmin } from "@/lib/admin-auth";
+import { actions } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
   beforeLoad: async () => {
     if (!(await isAdmin())) throw redirect({ to: "/admin/login" });
+    void actions.refresh();
   },
   head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
   component: AdminLayout,

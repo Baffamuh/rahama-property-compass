@@ -161,7 +161,7 @@ function AgentForm({ initial, isNew, codes, zones, onDone }: { initial: Agent; i
 
 function SaleForm({ onDone }: { onDone: () => void }) {
   const agents = useStore((s) => s.agents).filter((a) => a.active);
-  const properties = useStore((s) => s.properties).filter((p) => p.status !== "Sold" && p.status !== "Archived");
+  const properties = useStore((s) => s.properties).filter((p) => p.status !== "Sold" && p.status !== "Rented" && p.status !== "Archived");
   const [f, setF] = useState({ agentId: agents[0]?.id ?? "", propertyId: "", buyerName: "", buyerPhone: "", price: 0, amountPaid: 0, commission: 0, method: "Bank Transfer" as PaymentMethod, date: today() });
   const prop = properties.find((p) => p.id === f.propertyId);
   const save = (): void => {

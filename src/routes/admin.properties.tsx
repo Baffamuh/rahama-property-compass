@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
-import { compressImage } from "@/lib/image-upload";
+import { uploadPropertyPhoto } from "@/lib/image-upload";
 import { actions, useStore } from "@/lib/store";
-import { formatNaira, formatSize, slugify } from "@/lib/format";
-import { AREAS, IMAGES } from "@/lib/sample-data";
+import { formatPrice, formatSize, slugify } from "@/lib/format";
+import { AREAS } from "@/lib/sample-data";
 import { areasOf, findArea } from "@/lib/locations";
 import type { Property, PropertyStatus } from "@/lib/types";
 import { MeasurementEditor } from "@/components/site/LandMeasurement";
@@ -23,11 +23,11 @@ export const Route = createFileRoute("/admin/properties")({
   component: AdminProperties,
 });
 
-const STATUSES: PropertyStatus[] = ["Draft", "Published", "Reserved", "Sold", "Archived"];
-const LIBRARY = [IMAGES.land, IMAGES.house, IMAGES.villa, IMAGES.hero];
+const STATUSES: PropertyStatus[] = ["Draft", "Published", "Reserved", "Sold", "Rented", "Archived"];
+const TYPES: Property["type"][] = ["Residential Land", "Commercial Land", "House/Villa", "Shop", "Farm"];
 
 function blank(): Property {
-  return { id: actions.newId(), slug: "", ref: "", title: "", type: "Residential Land", status: "Draft", location: "Azare", area: AREAS[0]!, price: 0, size: 1, sizeUnit: "plots", description: "", features: [], images: [IMAGES.land], featured: false, createdAt: new Date().toISOString().slice(0, 10) };
+  return { id: actions.newId(), slug: "", ref: "", title: "", type: "Residential Land", listing: "Sale", status: "Draft", location: "Azare", area: AREAS[0]!, price: 0, size: 1, sizeUnit: "plots", description: "", features: [], images: [], featured: false, createdAt: new Date().toISOString().slice(0, 10) };
 }
 
 function AdminProperties() {
@@ -60,7 +60,7 @@ function AdminProperties() {
               <div className="min-w-0 flex-1">
                 <p className="font-medium leading-tight">{p.title}</p>
                 <p className="font-mono text-xs text-muted-foreground">{p.ref}</p>
-                <p className="mt-1 text-sm font-semibold">{formatNaira(p.price)}</p>
+                <p className="mt-1 text-sm font-semibold">{formatPrice(p)}</p>
                 <p className="text-xs text-muted-foreground">{p.type} · {formatSize(p.size, p.sizeUnit)}</p>
               </div>
             </div>
@@ -89,7 +89,7 @@ function AdminProperties() {
               <tr key={p.id} className="hover:bg-muted/30">
                 <td className="p-3"><div className="flex items-center gap-3"><img src={p.images[0]} alt="" className="h-10 w-14 rounded object-cover" /><div><p className="font-medium">{p.title}</p><p className="font-mono text-xs text-muted-foreground">{p.ref}</p></div></div></td>
                 <td className="p-3">{p.type}</td>
-                <td className="p-3 font-semibold">{formatNaira(p.price)}</td>
+                <td className="p-3 font-semibold">{formatPrice(p)}</td>
                 <td className="p-3">{formatSize(p.size, p.sizeUnit)}</td>
                 <td className="p-3">
                   <Select value={p.status} onValueChange={(v) => { actions.setStatus(p.id, v as PropertyStatus); toast.success(`${p.ref} set to ${v}`); }}>
@@ -133,7 +133,9 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
     if (p.title.trim().length < 3) { toast.error("Please enter a title"); return; }
     if (p.price <= 0) { toast.error("Please enter a price"); return; }
     if (p.images.length === 0) { toast.error("Add at least one image"); return; }
-    const ref = p.ref.trim() || `RHM-${p.location === "Azare" ? "AZR" : "BAU"}-${String(existing.length + 1).padStart(3, "0")}`;
+    const prefix = `RHM-${p.location === "Azare" ? "AZR" : "BAU"}-`;
+    const next = Math.max(0, ...existing.filter((x) => x.ref.startsWith(prefix)).map((x) => Number(x.ref.slice(prefix.length)) || 0)) + 1;
+    const ref = p.ref.trim() || `${prefix}${String(next).padStart(3, "0")}`;
     if (existing.some((x) => x.ref === ref && x.id !== p.id)) { toast.error("Reference code already in use"); return; }
     const slug = p.slug || slugify(`${p.title}-${ref}`);
     actions.saveProperty({ ...p, ref, slug, title: p.title.trim() });
@@ -153,7 +155,8 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
         <div className="sm:col-span-2">{row("Title", <Input value={p.title} onChange={(e) => set("title", e.target.value)} />)}</div>
         {row("Reference code", <Input placeholder="Auto e.g. RHM-AZR-009" value={p.ref} onChange={(e) => set("ref", e.target.value.toUpperCase())} />)}
         {row("Status", opt(p.status, (v) => set("status", v as PropertyStatus), STATUSES))}
-        {row("Type", opt(p.type, (v) => set("type", v as Property["type"]), ["Residential Land", "Commercial Land", "House/Villa"]))}
+        {row("Type", opt(p.type, (v) => set("type", v as Property["type"]), TYPES))}
+        {row("For sale or rent", opt(p.listing === "Rent" ? "For Rent" : "For Sale", (v) => setP((x) => ({ ...x, listing: v === "For Rent" ? "Rent" : "Sale", rentPeriod: v === "For Rent" ? x.rentPeriod ?? "year" : undefined })), ["For Sale", "For Rent"]))}
         {row("Zone", (
           <Select value={zone?.id ?? ""} onValueChange={(v) => {
             const z = zones.find((x) => x.id === v); const s = z?.subZones[0];
@@ -173,12 +176,13 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
           </Select>
         ))}
         {row("Area", opt(p.area, (v) => set("area", v), areaList))}
-        {row("Price (₦)", <Input type="number" min={0} value={p.price || ""} onChange={(e) => set("price", Number(e.target.value))} />)}
+        {row(p.listing === "Rent" ? "Rent amount (₦)" : "Price (₦)", <Input type="number" inputMode="numeric" min={0} value={p.price || ""} onChange={(e) => set("price", Number(e.target.value))} />)}
+        {p.listing === "Rent" && row("Rent is paid per", opt(p.rentPeriod === "month" ? "Month" : "Year", (v) => set("rentPeriod", v === "Month" ? "month" : "year"), ["Year", "Month"]))}
         <div className="flex gap-2">
           <div className="flex-1">{row("Size", <Input type="number" min={0} value={p.size} onChange={(e) => set("size", Number(e.target.value))} />)}</div>
           <div className="w-32">{row("Unit", opt(p.sizeUnit, (v) => set("sizeUnit", v as Property["sizeUnit"]), ["plots", "sqm", "hectares"]))}</div>
         </div>
-        {p.type === "House/Villa" && <>
+        {(p.type === "House/Villa" || p.type === "Shop") && <>
           {row("Bedrooms", <Input type="number" min={0} value={p.bedrooms ?? ""} onChange={(e) => set("bedrooms", Number(e.target.value))} />)}
           {row("Bathrooms", <Input type="number" min={0} value={p.bathrooms ?? ""} onChange={(e) => set("bathrooms", Number(e.target.value))} />)}
         </>}
@@ -199,22 +203,21 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
             ))}
           </div>
           <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-sm font-semibold text-primary hover:bg-primary/10">
-            <Upload className="h-4 w-4" />{uploading ? "Processing photos…" : "Upload photos from device / camera"}
+            <Upload className="h-4 w-4" />{uploading ? "Uploading & adding logo…" : "Upload photos from device / camera"}
             <input type="file" accept="image/*" multiple className="sr-only" disabled={uploading} onChange={async (e) => {
               const files = Array.from(e.target.files ?? []);
               e.target.value = "";
               if (!files.length) return;
               setUploading(true);
               try {
-                const out = await Promise.all(files.map((f) => compressImage(f)));
+                const out = await Promise.all(files.map((f) => uploadPropertyPhoto(f, p.id)));
                 setP((x) => ({ ...x, images: [...x.images, ...out] }));
                 toast.success(`${out.length} photo${out.length > 1 ? "s" : ""} added`);
-              } catch { toast.error("Could not read one of the photos"); }
+              } catch { toast.error("Upload failed. Check your internet and try again."); }
               finally { setUploading(false); }
             }} />
           </label>
-          <p className="text-xs text-muted-foreground">Photos are resized automatically so pages load fast. Or pick a sample:</p>
-          <div className="flex gap-2">{LIBRARY.map((img) => <button type="button" key={img} onClick={() => set("images", [...p.images, img])} className="opacity-80 hover:opacity-100"><img src={img} alt="" className="h-12 w-16 rounded object-cover" /></button>)}</div>
+          <p className="text-xs text-muted-foreground">Photos are resized and stamped with the Rahama logo automatically, then saved online.</p>
         </div>
         <div className="sm:col-span-2"><MeasurementEditor p={p} onChange={(patch) => setP((x) => ({ ...x, ...patch }))} /></div>
         <label className="flex items-center gap-3 sm:col-span-2"><Switch checked={p.featured} onCheckedChange={(v) => set("featured", v)} />Feature on homepage</label>

@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture
-- Data lives in a local mock store (src/lib/store.ts, localStorage) with typed models in src/lib/types.ts; swap its `actions` for backend calls when a database is connected, because every page reads only through `useStore`/`actions`.
+- All business data (properties, enquiries, zones, agents, sales, activity) is stored as JSON rows in one `app_records` table keyed by (collection, id); src/lib/store.ts loads it and every page reads only through `useStore`/`actions`. Why: one flexible table keeps the free tier simple and RLS decides what visitors vs admins see.
 - Admin sign-in uses backend auth; admin access is checked via the has_role() database function on user_roles, never client storage. Why: secure role checks.
 - Vercel builds: vite.config.ts switches nitro to the `vercel` preset when `VERCEL` env is set; Lovable builds keep their own target. Why: default output is a Cloudflare worker, which Vercel can't run.
-- Device photos are resized/re-encoded in the browser (src/lib/image-upload.ts) and stored as data URLs until real storage is connected. Why: zero-cost, no upload service.
+- Property photos are resized and logo-watermarked in the browser (src/lib/image-upload.ts), uploaded to the private `property-photos` bucket and referenced by 10-year signed links. Why: workspace blocks public buckets; zero-cost, no image service.

@@ -8,15 +8,14 @@ import { WhatsAppButton } from "@/components/site/WhatsAppButton";
 import { InspectionBooking, InstallmentCalculator, TitleBadges } from "@/components/site/PropertyExtras";
 import { MeasurementSummary } from "@/components/site/LandMeasurement";
 import { useStore } from "@/lib/store";
-import { formatNaira, formatSize, isPublic, propertyWhatsappMessage } from "@/lib/format";
-import { sampleProperties } from "@/lib/sample-data";
+import { formatPrice, formatSize, isPublic, propertyWhatsappMessage } from "@/lib/format";
 
 export const Route = createFileRoute("/properties/$slug")({
   head: ({ params }) => {
-    const p = sampleProperties.find((x) => x.slug === params.slug);
-    const title = p ? `${p.title} — ${formatNaira(p.price)} | Rahama Land & Property` : "Property — Rahama Land & Property";
-    const desc = p ? `${p.type} in ${p.area}. Ref ${p.ref}. ${p.description.slice(0, 120)}` : "Property details from Rahama Land & Property.";
-    return { meta: [{ title }, { name: "description", content: desc }, { property: "og:title", content: title }, { property: "og:description", content: desc }] };
+    const name = params.slug.replace(/-rhm-.*$/, "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const title = `${name} | Rahama Land & Property`;
+    const desc = `${name} in Azare / Bauchi State — photos, price, size and inspection booking from Rahama Land & Property.`;
+    return { meta: [{ title }, { name: "description", content: desc }, { property: "og:title", content: title }, { property: "og:description", content: desc }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] };
   },
   component: Detail,
 });
@@ -24,9 +23,16 @@ export const Route = createFileRoute("/properties/$slug")({
 function Detail() {
   const { slug } = Route.useParams();
   const properties = useStore((s) => s.properties);
+  const ready = useStore((s) => s.ready);
   const p = properties.find((x) => x.slug === slug && isPublic(x.status));
   const [active, setActive] = useState(0);
 
+  if (!p && !ready)
+    return (
+      <PublicLayout>
+        <div className="mx-auto max-w-7xl px-4 py-8"><div className="aspect-[3/2] w-full animate-pulse rounded-2xl bg-muted lg:w-2/3" /></div>
+      </PublicLayout>
+    );
   if (!p)
     return (
       <PublicLayout>
@@ -40,7 +46,7 @@ function Detail() {
 
   const facts = [
     { icon: Hash, l: "Reference", v: p.ref },
-    { icon: Tag, l: "Type", v: p.type },
+    { icon: Tag, l: "Type", v: `${p.type} · For ${p.listing === "Rent" ? "Rent" : "Sale"}` },
     { icon: Ruler, l: "Size", v: formatSize(p.size, p.sizeUnit) },
     { icon: MapPin, l: "Area", v: p.area },
     ...(p.bedrooms ? [{ icon: BedDouble, l: "Bedrooms", v: String(p.bedrooms) }] : []),
@@ -72,7 +78,7 @@ function Detail() {
             </div>
             <h1 className="mt-3 text-3xl font-bold md:text-4xl">{p.title}</h1>
             <p className="mt-2 flex items-center gap-1 text-muted-foreground"><MapPin className="h-4 w-4" />{p.area}, {p.location === "Azare" ? "Bauchi State" : "Bauchi State"}</p>
-            <p className="mt-4 text-3xl font-extrabold text-primary">{formatNaira(p.price)}</p>
+            <p className="mt-4 text-3xl font-extrabold text-primary">{formatPrice(p)}</p>
 
             <div className="mt-8 grid grid-cols-2 gap-4 rounded-xl border bg-card p-5 sm:grid-cols-3">
               {facts.map((f) => (
@@ -99,7 +105,7 @@ function Detail() {
             <h2 className="mt-10 text-xl font-bold">Location</h2>
             <p className="mt-3 text-muted-foreground">Located at {p.area}. Exact coordinates and directions are shared during site inspection booking.</p>
 
-            {p.status !== "Sold" && <div className="mt-10"><InstallmentCalculator price={p.price} /></div>}
+            {p.status !== "Sold" && p.status !== "Rented" && p.listing !== "Rent" && <div className="mt-10"><InstallmentCalculator price={p.price} /></div>}
           </div>
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
@@ -107,7 +113,7 @@ function Detail() {
               <h2 className="text-lg font-bold">Interested in this property?</h2>
               <p className="mb-4 text-sm text-muted-foreground">Fastest response is on WhatsApp.</p>
               <WhatsAppButton className="w-full" message={propertyWhatsappMessage(p)} />
-              {p.status !== "Sold" && <div className="mt-3" id="book-inspection"><InspectionBooking p={p} /></div>}
+              {p.status !== "Sold" && p.status !== "Rented" && <div className="mt-3" id="book-inspection"><InspectionBooking p={p} /></div>}
               <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or send an enquiry<span className="h-px flex-1 bg-border" /></div>
               <EnquiryForm propertyRef={p.ref} propertyTitle={p.title} defaultMessage={`I'm interested in ${p.title} (${p.ref}).`} />
             </div>
@@ -115,7 +121,7 @@ function Detail() {
         </div>
       </div>
       <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t bg-background/95 p-3 shadow-lg backdrop-blur lg:hidden">
-        {p.status !== "Sold" && <a href="#book-inspection" className="inline-flex flex-1 items-center justify-center rounded-md border border-primary px-3 py-3 text-sm font-semibold text-primary">Book inspection</a>}
+        {p.status !== "Sold" && p.status !== "Rented" && <a href="#book-inspection" className="inline-flex flex-1 items-center justify-center rounded-md border border-primary px-3 py-3 text-sm font-semibold text-primary">Book inspection</a>}
         <WhatsAppButton className="flex-1 px-3 text-sm" label="WhatsApp" message={propertyWhatsappMessage(p)} />
       </div>
       <div className="h-20 lg:hidden" />

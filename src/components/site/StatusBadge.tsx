@@ -5,6 +5,7 @@ const styles: Record<string, string> = {
   Available: "bg-accent text-accent-foreground",
   Reserved: "bg-warning text-foreground",
   Sold: "bg-destructive text-destructive-foreground",
+  Rented: "bg-destructive text-destructive-foreground",
   Draft: "bg-muted text-muted-foreground",
   Archived: "bg-secondary text-muted-foreground",
   New: "bg-accent text-accent-foreground",

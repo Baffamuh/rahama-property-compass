@@ -1,6 +1,7 @@
 export type PropertyType = "Residential Land" | "Commercial Land" | "House/Villa" | "Shop" | "Farm";
 export type ListingKind = "Sale" | "Rent";
 export type RentPeriod = "month" | "year";
+export type HouseCondition = "Completed" | "Semi-completed" | "Incomplete";
 export type PropertyStatus = "Draft" | "Published" | "Reserved" | "Sold" | "Rented" | "Archived";
 export type SizeUnit = "plots" | "sqm" | "hectares";
 export type EnquiryStatus = "New" | "Contacted" | "Viewing Scheduled" | "Closed";
@@ -14,6 +15,8 @@ export interface Property {
   /** For Sale (default) or For Rent. */
   listing?: ListingKind | undefined;
   rentPeriod?: RentPeriod | undefined;
+  /** Houses only: build stage. Rent houses are Completed or Semi-completed. */
+  condition?: HouseCondition | undefined;
   status: PropertyStatus;
   location: string;
   area: string;

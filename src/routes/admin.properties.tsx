@@ -7,7 +7,8 @@ import { actions, useStore } from "@/lib/store";
 import { formatPrice, formatSize, slugify } from "@/lib/format";
 import { AREAS } from "@/lib/sample-data";
 import { areasOf, findArea } from "@/lib/locations";
-import type { Property, PropertyStatus } from "@/lib/types";
+import type { HouseCondition, Property, PropertyStatus } from "@/lib/types";
+import { houseConditions, isCodeTaken, nextCode } from "@/lib/property-codes";
 import { MeasurementEditor } from "@/components/site/LandMeasurement";
 import { StatusBadge } from "@/components/site/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -133,10 +134,8 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
     if (p.title.trim().length < 3) { toast.error("Please enter a title"); return; }
     if (p.price <= 0) { toast.error("Please enter a price"); return; }
     if (p.images.length === 0) { toast.error("Add at least one image"); return; }
-    const prefix = `RHM-${p.location === "Azare" ? "AZR" : "BAU"}-`;
-    const next = Math.max(0, ...existing.filter((x) => x.ref.startsWith(prefix)).map((x) => Number(x.ref.slice(prefix.length)) || 0)) + 1;
-    const ref = p.ref.trim() || `${prefix}${String(next).padStart(3, "0")}`;
-    if (existing.some((x) => x.ref === ref && x.id !== p.id)) { toast.error("Reference code already in use"); return; }
+    const ref = p.ref.trim().toUpperCase() || nextCode(p, existing.filter((x) => x.id !== p.id));
+    if (isCodeTaken(ref, existing, p.id)) { toast.error("This code is already used by another property"); return; }
     const slug = p.slug || slugify(`${p.title}-${ref}`);
     actions.saveProperty({ ...p, ref, slug, title: p.title.trim() });
     toast.success(isNew ? "Property created" : "Property updated");
@@ -153,10 +152,16 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
       <DialogHeader><DialogTitle>{isNew ? "Create new property" : `Edit ${p.ref}`}</DialogTitle></DialogHeader>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">{row("Title", <Input value={p.title} onChange={(e) => set("title", e.target.value)} />)}</div>
-        {row("Reference code", <Input placeholder="Auto e.g. RHM-AZR-009" value={p.ref} onChange={(e) => set("ref", e.target.value.toUpperCase())} />)}
         {row("Status", opt(p.status, (v) => set("status", v as PropertyStatus), STATUSES))}
-        {row("Type", opt(p.type, (v) => set("type", v as Property["type"]), TYPES))}
-        {row("For sale or rent", opt(p.listing === "Rent" ? "For Rent" : "For Sale", (v) => setP((x) => ({ ...x, listing: v === "For Rent" ? "Rent" : "Sale", rentPeriod: v === "For Rent" ? x.rentPeriod ?? "year" : undefined })), ["For Sale", "For Rent"]))}
+        {row("Type", opt(p.type, (v) => setP((x) => ({ ...x, type: v as Property["type"], condition: v === "House/Villa" ? x.condition ?? "Completed" : undefined })), TYPES))}
+        {row("For sale or rent", opt(p.listing === "Rent" ? "For Rent" : "For Sale", (v) => setP((x) => ({ ...x, listing: v === "For Rent" ? "Rent" : "Sale", rentPeriod: v === "For Rent" ? x.rentPeriod ?? "year" : undefined, condition: v === "For Rent" && x.condition === "Incomplete" ? "Semi-completed" : x.condition })), ["For Sale", "For Rent"]))}
+        {p.type === "House/Villa" && row("House condition", opt(p.condition ?? "Completed", (v) => set("condition", v as HouseCondition), houseConditions(p.listing)))}
+        <div className="sm:col-span-2">{row("Property code (type your own or press Auto)", (
+          <div className="flex gap-2">
+            <Input placeholder={`Auto e.g. ${nextCode(p, existing.filter((x) => x.id !== p.id))}`} value={p.ref} onChange={(e) => set("ref", e.target.value.toUpperCase())} />
+            <Button type="button" variant="outline" onClick={() => set("ref", nextCode(p, existing.filter((x) => x.id !== p.id)))}>Auto</Button>
+          </div>
+        ))}</div>
         {row("Zone", (
           <Select value={zone?.id ?? ""} onValueChange={(v) => {
             const z = zones.find((x) => x.id === v); const s = z?.subZones[0];

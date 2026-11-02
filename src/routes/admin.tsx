@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Trophy, Menu } from "lucide-react";
+import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Trophy, Menu, Users } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdmin } from "@/lib/admin-auth";
@@ -22,6 +22,7 @@ const nav = [
   { to: "/admin/locations", label: "Zones & Areas", icon: Map, exact: false },
   { to: "/admin/agents", label: "Agents & Sales", icon: Trophy, exact: false },
   { to: "/admin/enquiries", label: "Enquiries", icon: Inbox, exact: false },
+  { to: "/admin/team", label: "Admin Accounts", icon: Users, exact: false },
 ] as const;
 
 function AdminLayout() {

@@ -1,7 +1,7 @@
 export type PropertyType = "Residential Land" | "Commercial Land" | "House/Villa" | "Shop" | "Farm";
 export type ListingKind = "Sale" | "Rent";
 export type RentPeriod = "month" | "year";
-export type HouseCondition = "Completed" | "Semi-completed" | "Incomplete";
+export type HouseCondition = "Completed" | "Semi-completed" | "Uncompleted";
 export type PropertyStatus = "Draft" | "Published" | "Reserved" | "Sold" | "Rented" | "Archived";
 export type SizeUnit = "plots" | "sqm" | "hectares";
 export type EnquiryStatus = "New" | "Contacted" | "Viewing Scheduled" | "Closed";

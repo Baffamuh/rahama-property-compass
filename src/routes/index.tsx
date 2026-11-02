@@ -46,7 +46,7 @@ function Home() {
   return (
     <PublicLayout>
       <section className="relative isolate overflow-hidden">
-        <img src={IMAGES.hero} alt="Estate in Azare at sunset" width={1600} height={912} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+        <img src={IMAGES.hero} fetchPriority="high" decoding="async" alt="Estate in Azare at sunset" width={1600} height={912} className="absolute inset-0 -z-10 h-full w-full object-cover" />
         <div className="bg-hero-overlay absolute inset-0 -z-10" />
         <div className="mx-auto max-w-7xl px-4 pb-20 pt-24 text-primary-foreground md:pb-28 md:pt-36">
           <p className="inline-flex items-center gap-2 rounded-full bg-background/15 px-3 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur">

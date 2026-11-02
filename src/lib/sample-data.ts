@@ -1,7 +1,7 @@
-import hero from "@/assets/hero.jpg";
-import land from "@/assets/land.jpg";
-import house from "@/assets/house.jpg";
-import villa from "@/assets/villa.jpg";
+import hero from "@/assets/hero.webp";
+import land from "@/assets/land.webp";
+import house from "@/assets/house.webp";
+import villa from "@/assets/villa.webp";
 import type { Activity, Enquiry, Property } from "./types";
 
 export const IMAGES = { hero, land, house, villa };

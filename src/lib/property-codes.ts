@@ -1,6 +1,6 @@
 import type { HouseCondition, ListingKind, Property, PropertyType } from "./types";
 
-export const SALE_HOUSE_CONDITIONS: HouseCondition[] = ["Completed", "Semi-completed", "Incomplete"];
+export const SALE_HOUSE_CONDITIONS: HouseCondition[] = ["Completed", "Semi-completed", "Uncompleted"];
 export const RENT_HOUSE_CONDITIONS: HouseCondition[] = ["Completed", "Semi-completed"];
 
 export function houseConditions(listing: ListingKind | undefined): HouseCondition[] {
@@ -13,7 +13,7 @@ const CAT: Record<Exclude<PropertyType, "House/Villa">, string> = {
   Shop: "SH",
   Farm: "FM",
 };
-const HOUSE: Record<HouseCondition, string> = { Completed: "HC", "Semi-completed": "HS", Incomplete: "HI" };
+const HOUSE: Record<HouseCondition, string> = { Completed: "HC", "Semi-completed": "HS", Uncompleted: "HU" };
 
 /** Category prefix, e.g. RHM-S-HC- (sale, completed house) or RHM-R-SH- (rent, shop). */
 export function codePrefix(p: Pick<Property, "type" | "listing" | "condition">): string {

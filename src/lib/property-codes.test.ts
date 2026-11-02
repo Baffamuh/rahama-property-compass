@@ -9,7 +9,7 @@ describe("property codes", () => {
   it("each house condition has its own code", () => {
     expect(codePrefix({ type: "House/Villa", listing: "Sale", condition: "Completed" })).toBe("RHM-S-HC-");
     expect(codePrefix({ type: "House/Villa", listing: "Sale", condition: "Semi-completed" })).toBe("RHM-S-HS-");
-    expect(codePrefix({ type: "House/Villa", listing: "Sale", condition: "Incomplete" })).toBe("RHM-S-HI-");
+    expect(codePrefix({ type: "House/Villa", listing: "Sale", condition: "Uncompleted" })).toBe("RHM-S-HU-");
   });
   it("rent houses only allow completed and semi-completed", () => {
     expect(houseConditions("Rent")).toEqual(["Completed", "Semi-completed"]);

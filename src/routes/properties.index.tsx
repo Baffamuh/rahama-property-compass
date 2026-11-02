@@ -10,10 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useStore } from "@/lib/store";
 import { isPublic } from "@/lib/format";
 import { areasOf, townsOf, zoneOfProperty } from "@/lib/locations";
+import { houseConditions } from "@/lib/property-codes";
 
 const searchSchema = z.object({
   q: z.string().optional(),
   type: z.string().optional(),
+  condition: z.enum(["Completed", "Semi-completed", "Uncompleted"]).optional(),
   listing: z.enum(["Sale", "Rent"]).optional(),
   location: z.string().optional(),
   area: z.string().optional(),
@@ -54,6 +56,7 @@ function Catalogue() {
         if (!isPublic(p.status)) return false;
         if (s.q && !`${p.title} ${p.ref} ${p.area}`.toLowerCase().includes(s.q.toLowerCase())) return false;
         if (s.type && p.type !== s.type) return false;
+        if (s.condition && (p.condition ?? "Completed") !== s.condition) return false;
         if (s.listing && (p.listing ?? "Sale") !== s.listing) return false;
         if (s.location && p.location !== s.location) return false;
         if (s.area && p.area !== s.area) return false;
@@ -93,9 +96,16 @@ function Catalogue() {
         </div>
         <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
           {([[undefined, "All types"], ["Residential Land", "Residential land"], ["Commercial Land", "Commercial land"], ["House/Villa", "Houses"], ["Shop", "Shops"], ["Farm", "Farms"]] as const).map(([v, l]) => (
-            <button key={l} onClick={() => setS({ type: v })} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium ${s.type === v ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}>{l}</button>
+            <button key={l} onClick={() => setS({ type: v, condition: undefined })} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium ${s.type === v ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}>{l}</button>
           ))}
         </div>
+        {s.type === "House/Villa" && (
+          <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1">
+            {([undefined, ...houseConditions(s.listing)] as const).map((v) => (
+              <button key={v ?? "all"} onClick={() => setS({ condition: v })} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${s.condition === v ? "border-accent bg-accent text-accent-foreground" : "bg-card"}`}>{v ? `${v} houses` : "All houses"}</button>
+            ))}
+          </div>
+        )}
         <div className={`mt-3 gap-3 rounded-xl border bg-card p-4 sm:grid-cols-2 md:grid md:grid-cols-3 lg:grid-cols-6 ${showFilters ? "grid" : "hidden"}`}>
           {sel(s.location, (v) => setS({ location: v, zone: undefined, area: undefined }), "All towns", townsOf(zones).map((t) => [t, t]))}
           {sel(s.zone, (v) => setS({ zone: v, area: undefined }), "All zones", zones.filter((z) => !s.location || z.town === s.location).map((z) => [z.id, z.name]))}

@@ -154,7 +154,7 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
         <div className="sm:col-span-2">{row("Title", <Input value={p.title} onChange={(e) => set("title", e.target.value)} />)}</div>
         {row("Status", opt(p.status, (v) => set("status", v as PropertyStatus), STATUSES))}
         {row("Type", opt(p.type, (v) => setP((x) => ({ ...x, type: v as Property["type"], condition: v === "House/Villa" ? x.condition ?? "Completed" : undefined })), TYPES))}
-        {row("For sale or rent", opt(p.listing === "Rent" ? "For Rent" : "For Sale", (v) => setP((x) => ({ ...x, listing: v === "For Rent" ? "Rent" : "Sale", rentPeriod: v === "For Rent" ? x.rentPeriod ?? "year" : undefined, condition: v === "For Rent" && x.condition === "Incomplete" ? "Semi-completed" : x.condition })), ["For Sale", "For Rent"]))}
+        {row("For sale or rent", opt(p.listing === "Rent" ? "For Rent" : "For Sale", (v) => setP((x) => ({ ...x, listing: v === "For Rent" ? "Rent" : "Sale", rentPeriod: v === "For Rent" ? x.rentPeriod ?? "year" : undefined, condition: v === "For Rent" && x.condition === "Uncompleted" ? "Semi-completed" : x.condition })), ["For Sale", "For Rent"]))}
         {p.type === "House/Villa" && row("House condition", opt(p.condition ?? "Completed", (v) => set("condition", v as HouseCondition), houseConditions(p.listing)))}
         <div className="sm:col-span-2">{row("Property code (type your own or press Auto)", (
           <div className="flex gap-2">

@@ -44,10 +44,25 @@ async function fetchAll() {
   });
 }
 
+// Public listings + zones are kept on the device so return visits show instantly
+// while fresh data loads. Private admin data (enquiries, sales) is never cached.
+const CACHE_KEY = "rahama-public-cache-v1";
+const PUBLIC = new Set(["Published", "Reserved", "Sold", "Rented"]);
+function readCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null") as { properties: Property[]; zones: Zone[] } | null;
+    if (c && Array.isArray(c.properties)) setState({ ...state, ready: true, properties: c.properties, zones: c.zones?.length ? c.zones : state.zones });
+  } catch { /* ignore */ }
+}
+function writeCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ properties: state.properties.filter((p) => PUBLIC.has(p.status)), zones: state.zones })); } catch { /* ignore */ }
+}
+
 function start() {
   if (started || typeof window === "undefined") return;
   started = true;
-  void fetchAll();
+  readCache();
+  void fetchAll().then(writeCache);
 }
 
 function setState(next: State) {

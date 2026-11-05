@@ -53,7 +53,7 @@ function Home() {
             <ShieldCheck className="h-4 w-4 text-accent" /> RC NO. {COMPANY.rc}
           </p>
           <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-tight md:text-6xl">
-            Own land and property in <span className="text-accent">Azare & Bauchi</span> with confidence.
+            Own land and property in <span className="text-accent">Azare</span> with confidence.
           </h1>
           <p className="mt-5 max-w-xl text-lg opacity-90">Verified plots, quality homes and honest title guidance from a registered local developer.</p>
 

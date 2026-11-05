@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isAdmin } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/admin_/login")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Admin Sign In — Rahama Property Hub" },

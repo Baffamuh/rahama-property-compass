@@ -57,7 +57,7 @@ function AdminProperties() {
         {list.map((p) => (
           <div key={p.id} className="rounded-xl border bg-card p-3">
             <div className="flex min-w-0 gap-3">
-              <img src={p.images[0]} alt="" className="h-16 w-20 shrink-0 rounded object-cover" />
+              <img src={p.images[0]} alt="" loading="lazy" decoding="async" className="h-16 w-20 shrink-0 rounded object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium leading-tight">{p.title}</p>
                 <p className="font-mono text-xs text-muted-foreground">{p.ref}</p>
@@ -88,7 +88,7 @@ function AdminProperties() {
           <tbody className="divide-y">
             {list.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
-                <td className="p-3"><div className="flex items-center gap-3"><img src={p.images[0]} alt="" className="h-10 w-14 rounded object-cover" /><div><p className="font-medium">{p.title}</p><p className="font-mono text-xs text-muted-foreground">{p.ref}</p></div></div></td>
+                <td className="p-3"><div className="flex items-center gap-3"><img src={p.images[0]} alt="" loading="lazy" decoding="async" className="h-10 w-14 rounded object-cover" /><div><p className="font-medium">{p.title}</p><p className="font-mono text-xs text-muted-foreground">{p.ref}</p></div></div></td>
                 <td className="p-3">{p.type}</td>
                 <td className="p-3 font-semibold">{formatPrice(p)}</td>
                 <td className="p-3">{formatSize(p.size, p.sizeUnit)}</td>
@@ -202,7 +202,7 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
           <div className="flex flex-wrap gap-2">
             {p.images.map((img, i) => (
               <div key={i} className="relative">
-                <img src={img} alt="" className="h-16 w-24 rounded object-cover" />
+                <img src={img} alt="" loading="lazy" decoding="async" className="h-16 w-24 rounded object-cover" />
                 <button aria-label="Remove image" onClick={() => set("images", p.images.filter((_, j) => j !== i))} className="absolute -right-2 -top-2 rounded-full bg-destructive p-0.5 text-destructive-foreground"><X className="h-3 w-3" /></button>
               </div>
             ))}

@@ -60,7 +60,7 @@ function Detail() {
         <div className="mt-6 grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="overflow-hidden rounded-2xl">
-              <img src={p.images[active]} alt={p.title} width={1200} height={800} className="aspect-[3/2] w-full object-cover" />
+              <img src={p.images[active]} alt={p.title} fetchPriority="high" decoding="async" width={1200} height={800} className="aspect-[3/2] w-full object-cover" />
             </div>
             {p.images.length > 1 && (
               <div className="mt-3 flex gap-3 overflow-x-auto pb-1">

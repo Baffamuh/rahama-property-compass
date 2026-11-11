@@ -11,6 +11,8 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "Learn about Rahama Land and Property Development Ltd., a registered real-estate company in Azare, Bauchi State." },
       { property: "og:title", content: "About Rahama Land & Property" },
       { property: "og:description", content: "Registered real-estate developer in Azare, Bauchi State. RC 9871926." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: About,

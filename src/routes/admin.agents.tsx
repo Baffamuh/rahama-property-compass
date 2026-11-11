@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/agents")({
-  head: () => ({ meta: [{ title: "Agents & Sales — Rahama Admin" }, { name: "description", content: "Agent directory, sales records and annual best-seller leaderboard." }, { property: "og:title", content: "Agents & Sales — Rahama Admin" }, { property: "og:description", content: "Agent directory and leaderboard." }] }),
+  head: () => ({ meta: [{ title: "Agents & Sales — Rahama Admin" }, { name: "description", content: "Agent directory, sales records and annual best-seller leaderboard." }, { property: "og:title", content: "Agents & Sales — Rahama Admin" }, { property: "og:description", content: "Agent directory and leaderboard." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AgentsPage,
 });
 

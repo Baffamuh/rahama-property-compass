@@ -11,6 +11,8 @@ export const Route = createFileRoute("/services")({
       { name: "description", content: "Land sales, property development, title documentation and free site inspections in Azare and Bauchi State." },
       { property: "og:title", content: "Services — Rahama Land & Property" },
       { property: "og:description", content: "Land sales, development, C of O documentation and site inspections." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Services,

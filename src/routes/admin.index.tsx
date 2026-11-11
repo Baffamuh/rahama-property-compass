@@ -5,7 +5,7 @@ import { formatNaira } from "@/lib/format";
 import { StatusBadge } from "@/components/site/StatusBadge";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Dashboard — Rahama Admin" }, { name: "description", content: "Admin overview." }, { property: "og:title", content: "Dashboard — Rahama Admin" }, { property: "og:description", content: "Admin overview." }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Rahama Admin" }, { name: "description", content: "Admin overview." }, { property: "og:title", content: "Dashboard — Rahama Admin" }, { property: "og:description", content: "Admin overview." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Overview,
 });
 

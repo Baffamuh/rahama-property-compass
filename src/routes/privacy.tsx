@@ -9,6 +9,8 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: "How Rahama Land and Property Development Ltd. handles your information, plus our listing disclaimer." },
       { property: "og:title", content: "Privacy & Disclaimer — Rahama" },
       { property: "og:description", content: "Privacy policy and legal disclaimer." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Privacy,

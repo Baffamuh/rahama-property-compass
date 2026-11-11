@@ -72,6 +72,7 @@ export interface Zone {
   name: string;
   town: string;
   order?: number;
+  areas?: string[];
   subZones: SubZone[];
 }
 

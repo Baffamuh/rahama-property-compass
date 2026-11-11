@@ -14,3 +14,5 @@
 - Admin sign-in uses backend auth; admin access is checked via the has_role() database function on user_roles, never client storage. Why: secure role checks.
 - Vercel builds: vite.config.ts switches nitro to the `vercel` preset when `VERCEL` env is set; Lovable builds keep their own target. Why: default output is a Cloudflare worker, which Vercel can't run.
 - Property photos are resized and logo-watermarked in the browser (src/lib/image-upload.ts), uploaded to the private `property-photos` bucket and referenced by 10-year signed links. Why: workspace blocks public buckets; zero-cost, no image service.
+- Store direct zone areas in optional `Zone.areas`, retaining legacy `subZones` reads so historical geography and listing references remain usable.
+- Refresh the shared store on focus, cross-tab cache changes, and a visible-page 15-second interval; await property persistence before confirming creation so public visibility reflects a successful save without paid realtime services.

@@ -18,6 +18,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Buy verified land plots and quality homes in Azare and Bauchi State. Rahama Land and Property Development Ltd., RC 9871926." },
       { property: "og:title", content: "Rahama Land & Property — Azare, Bauchi" },
       { property: "og:description", content: "Verified land plots and quality homes in Azare and Bauchi State." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Home,

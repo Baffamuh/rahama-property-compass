@@ -22,13 +22,17 @@ const initial: State = { ready: false, properties: [], enquiries: [], activity: 
 let state: State = initial;
 let started = false;
 let zonesInDb = false;
+let revision = 0;
+let fetching: Promise<void> | undefined;
 const listeners = new Set<() => void>();
 
 const byDateDesc = <T extends { createdAt?: string; at?: string }>(a: T, b: T) => (b.createdAt ?? b.at ?? "").localeCompare(a.createdAt ?? a.at ?? "");
 
 /** Fetch every record the current visitor is allowed to see (RLS decides). */
-async function fetchAll() {
+async function loadAll() {
+  const atRevision = revision;
   const { data, error } = await supabase.from("app_records").select("collection, data").limit(5000);
+  if (atRevision !== revision) return;
   if (error) { notify("Could not load data from the server. Check your internet connection."); setState({ ...state, ready: true }); return; }
   const g: Record<Collection, unknown[]> = { properties: [], enquiries: [], zones: [], agents: [], sales: [], activity: [] };
   for (const r of data ?? []) g[r.collection as Collection]?.push(r.data);
@@ -42,11 +46,18 @@ async function fetchAll() {
     agents: g.agents as Agent[],
     sales: (g.sales as Sale[]).sort(byDateDesc),
   });
+  writeCache();
+}
+
+function fetchAll(): Promise<void> {
+  if (fetching) return fetching;
+  fetching = loadAll().finally(() => { fetching = undefined; });
+  return fetching;
 }
 
 // Public listings + zones are kept on the device so return visits show instantly
 // while fresh data loads. Private admin data (enquiries, sales) is never cached.
-const CACHE_KEY = "rahama-public-cache-v1";
+const CACHE_KEY = "rahama-public-cache-v2";
 const PUBLIC = new Set(["Published", "Reserved", "Sold", "Rented"]);
 function readCache() {
   try {
@@ -63,6 +74,11 @@ function start() {
   started = true;
   readCache();
   void fetchAll().then(writeCache);
+  window.addEventListener("focus", () => { void fetchAll(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) void fetchAll(); });
+  window.addEventListener("storage", (e) => { if (e.key === CACHE_KEY) { readCache(); void fetchAll(); } });
+  // Cross-device updates without paid services or a persistent connection.
+  window.setInterval(() => { if (!document.hidden) void fetchAll(); }, 15000);
 }
 
 function setState(next: State) {
@@ -77,6 +93,7 @@ function notify(msg: string) {
 async function put(collection: Collection, id: string, data: unknown) {
   const { error } = await supabase.from("app_records").upsert({ collection, id, data: data as Json, updated_at: new Date().toISOString() });
   if (error) notify("Saving failed — please check your connection and try again.");
+  return !error;
 }
 async function remove(collection: Collection, id: string) {
   const { error } = await supabase.from("app_records").delete().eq("collection", collection).eq("id", id);
@@ -123,24 +140,32 @@ export const actions = {
     const e = enquiries.find((x) => x.id === id);
     if (e) void put("enquiries", id, e);
   },
-  saveProperty(p: Property) {
+  async saveProperty(p: Property) {
     const exists = state.properties.some((x) => x.id === p.id);
+    const saved = await put("properties", p.id, p);
+    if (!saved) return false;
+    revision++;
     setState({
       ...state,
       properties: exists ? state.properties.map((x) => (x.id === p.id ? p : x)) : [p, ...state.properties],
       activity: log(`${exists ? "Updated" : "Created"} ${p.ref}: ${p.title}`),
     });
-    void put("properties", p.id, p);
+    writeCache();
+    return true;
   },
   setStatus(id: string, status: Property["status"]) {
     const p = state.properties.find((x) => x.id === id);
     if (!p) return;
     const next = { ...p, status };
     setState({ ...state, properties: state.properties.map((x) => (x.id === id ? next : x)), activity: log(`${p.ref} marked ${status}`) });
+    revision++;
+    writeCache();
     void put("properties", id, next);
   },
   deleteProperty(id: string) {
     setState({ ...state, properties: state.properties.filter((x) => x.id !== id) });
+    revision++;
+    writeCache();
     void remove("properties", id);
   },
   addZone(name: string, town: string) {
@@ -160,6 +185,36 @@ export const actions = {
   },
   addSubZone(zoneId: string, name: string) {
     editZone(zoneId, (z) => ({ ...z, subZones: [...z.subZones, { id: uid(), name, areas: [] }] }));
+  },
+  async addZoneAreas(zoneId: string, names: string[]) {
+    const zone = state.zones.find((z) => z.id === zoneId);
+    if (!zone) return false;
+    const next = { ...zone, areas: [...new Set([...(zone.areas ?? []), ...names.map((n) => n.trim()).filter(Boolean)])] };
+    if (!await put("zones", zoneId, next)) return false;
+    revision++;
+    setState({ ...state, zones: state.zones.map((z) => z.id === zoneId ? next : z) });
+    writeCache();
+    return true;
+  },
+  async renameZoneArea(zoneId: string, area: string, name: string) {
+    const zone = state.zones.find((z) => z.id === zoneId);
+    if (!zone || !name.trim()) return false;
+    const next = { ...zone, areas: [...new Set((zone.areas ?? []).map((a) => a === area ? name.trim() : a))], subZones: zone.subZones.map((s) => ({ ...s, areas: [...new Set(s.areas.map((a) => a === area ? name.trim() : a))] })) };
+    if (!await put("zones", zoneId, next)) return false;
+    revision++;
+    setState({ ...state, zones: state.zones.map((z) => z.id === zoneId ? next : z) });
+    writeCache();
+    return true;
+  },
+  async deleteZoneArea(zoneId: string, area: string) {
+    const zone = state.zones.find((z) => z.id === zoneId);
+    if (!zone) return false;
+    const next = { ...zone, areas: (zone.areas ?? []).filter((a) => a !== area), subZones: zone.subZones.map((s) => ({ ...s, areas: s.areas.filter((a) => a !== area) })) };
+    if (!await put("zones", zoneId, next)) return false;
+    revision++;
+    setState({ ...state, zones: state.zones.map((z) => z.id === zoneId ? next : z) });
+    writeCache();
+    return true;
   },
   updateSubZone(zoneId: string, subId: string, name: string) {
     editSub(zoneId, subId, (s) => ({ ...s, name }));

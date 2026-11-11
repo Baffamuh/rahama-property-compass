@@ -5,7 +5,6 @@ import { Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import { uploadPropertyPhoto } from "@/lib/image-upload";
 import { actions, useStore } from "@/lib/store";
 import { formatPrice, formatSize, slugify } from "@/lib/format";
-import { AREAS } from "@/lib/sample-data";
 import { areasOf, findArea } from "@/lib/locations";
 import type { HouseCondition, Property, PropertyStatus } from "@/lib/types";
 import { houseConditions, isCodeTaken, nextCode } from "@/lib/property-codes";
@@ -20,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/properties")({
-  head: () => ({ meta: [{ title: "Properties — Rahama Admin" }, { name: "description", content: "Manage listings." }, { property: "og:title", content: "Properties — Rahama Admin" }, { property: "og:description", content: "Manage listings." }] }),
+  head: () => ({ meta: [{ title: "Properties — Rahama Admin" }, { name: "description", content: "Manage listings." }, { property: "og:title", content: "Properties — Rahama Admin" }, { property: "og:description", content: "Manage listings." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AdminProperties,
 });
 
@@ -28,7 +27,7 @@ const STATUSES: PropertyStatus[] = ["Draft", "Published", "Reserved", "Sold", "R
 const TYPES: Property["type"][] = ["Residential Land", "Commercial Land", "House/Villa", "Shop", "Farm"];
 
 function blank(): Property {
-  return { id: actions.newId(), slug: "", ref: "", title: "", type: "Residential Land", listing: "Sale", status: "Draft", location: "Azare", area: AREAS[0]!, price: 0, size: 1, sizeUnit: "plots", description: "", features: [], images: [], featured: false, createdAt: new Date().toISOString().slice(0, 10) };
+  return { id: actions.newId(), slug: "", ref: "", title: "", type: "Residential Land", listing: "Sale", status: "Published", location: "Azare", area: "", price: 0, size: 1, sizeUnit: "plots", description: "", features: [], images: [], featured: false, createdAt: new Date().toISOString().slice(0, 10) };
 }
 
 function AdminProperties() {
@@ -122,22 +121,30 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
   const [p, setP] = useState<Property>(initial);
   const [feature, setFeature] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newArea, setNewArea] = useState("");
   const zones = useStore((s) => s.zones);
   const legacy = findArea(zones, p.area);
   const zone = zones.find((z) => z.id === p.zoneId) ?? legacy?.zone;
   const subZone = zone?.subZones.find((s) => s.id === p.subZoneId) ?? (legacy?.zone.id === zone?.id ? legacy?.subZone : undefined);
-  const subAreas = zone ? areasOf(zones, { zoneId: zone.id, subZoneId: subZone?.id }) : [];
-  const areaList = subAreas.includes(p.area) ? subAreas : [p.area, ...subAreas];
+  const subAreas = zone ? areasOf(zones, { zoneId: zone.id }) : [];
+  const areaList = [...new Set([p.area, ...subAreas].filter(Boolean))];
   const set = <K extends keyof Property>(k: K, v: Property[K]) => setP((x) => ({ ...x, [k]: v }));
 
-  const save = (): void => {
+  const save = async (): Promise<void> => {
+    if (saving || uploading) return;
     if (p.title.trim().length < 3) { toast.error("Please enter a title"); return; }
     if (p.price <= 0) { toast.error("Please enter a price"); return; }
     if (p.images.length === 0) { toast.error("Add at least one image"); return; }
+    if (!zone) { toast.error("Choose a zone"); return; }
+    if (!p.area.trim()) { toast.error("Choose or add an area"); return; }
     const ref = p.ref.trim().toUpperCase() || nextCode(p, existing.filter((x) => x.id !== p.id));
     if (isCodeTaken(ref, existing, p.id)) { toast.error("This code is already used by another property"); return; }
     const slug = p.slug || slugify(`${p.title}-${ref}`);
-    actions.saveProperty({ ...p, ref, slug, title: p.title.trim() });
+    setSaving(true);
+    const saved = await actions.saveProperty({ ...p, ref, slug, title: p.title.trim(), zoneId: zone.id });
+    setSaving(false);
+    if (!saved) return;
     toast.success(isNew ? "Property created" : "Property updated");
     onDone();
   };
@@ -165,13 +172,13 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
         {row("Zone", (
           <Select value={zone?.id ?? ""} onValueChange={(v) => {
             const z = zones.find((x) => x.id === v); const s = z?.subZones[0];
-            setP((x) => ({ ...x, zoneId: v, subZoneId: s?.id, location: z?.town ?? x.location, area: s?.areas[0] ?? x.area }));
+            setP((x) => ({ ...x, zoneId: v, subZoneId: s?.id, location: z?.town ?? x.location, area: areasOf(zones, { zoneId: v })[0] ?? "" }));
           }}>
             <SelectTrigger><SelectValue placeholder="Choose zone" /></SelectTrigger>
             <SelectContent>{zones.map((z) => <SelectItem key={z.id} value={z.id}>{z.name} ({z.town})</SelectItem>)}</SelectContent>
           </Select>
         ))}
-        {row("Sub-zone", (
+        {zone && zone.subZones.length > 0 && row("Sub-zone", (
           <Select value={subZone?.id ?? ""} disabled={!zone} onValueChange={(v) => {
             const s = zone?.subZones.find((x) => x.id === v);
             setP((x) => ({ ...x, subZoneId: v, area: s?.areas[0] ?? x.area }));
@@ -180,7 +187,8 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
             <SelectContent>{zone?.subZones.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
           </Select>
         ))}
-        {row("Area", opt(p.area, (v) => set("area", v), areaList))}
+        {row("Area", <Select value={p.area} disabled={!zone} onValueChange={(v) => setP((x) => ({ ...x, area: v, subZoneId: findArea(zones.filter((z) => z.id === zone?.id), v)?.subZone?.id }))}><SelectTrigger><SelectValue placeholder={zone ? "Choose area" : "Pick a zone first"} /></SelectTrigger><SelectContent>{areaList.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}</SelectContent></Select>)}
+        {zone && <div className="flex min-w-0 gap-2 sm:col-span-2"><Input aria-label="New area name" placeholder="New area name" value={newArea} onChange={(e) => setNewArea(e.target.value)} /><Button variant="outline" disabled={!newArea.trim()} onClick={async () => { if (await actions.addZoneAreas(zone.id, [newArea])) { setP((x) => ({ ...x, area: newArea.trim(), subZoneId: undefined })); setNewArea(""); } }}><Plus className="h-4 w-4" />Add area</Button></div>}
         {row(p.listing === "Rent" ? "Rent amount (₦)" : "Price (₦)", <Input type="number" inputMode="numeric" min={0} value={p.price || ""} onChange={(e) => set("price", Number(e.target.value))} />)}
         {p.listing === "Rent" && row("Rent is paid per", opt(p.rentPeriod === "month" ? "Month" : "Year", (v) => set("rentPeriod", v === "Month" ? "month" : "year"), ["Year", "Month"]))}
         <div className="flex gap-2">
@@ -227,7 +235,7 @@ function Editor({ initial, isNew, existing, onDone }: { initial: Property; isNew
         <div className="sm:col-span-2"><MeasurementEditor p={p} onChange={(patch) => setP((x) => ({ ...x, ...patch }))} /></div>
         <label className="flex items-center gap-3 sm:col-span-2"><Switch checked={p.featured} onCheckedChange={(v) => set("featured", v)} />Feature on homepage</label>
       </div>
-      <div className="mt-4 flex justify-end gap-2"><Button variant="outline" onClick={onDone}>Cancel</Button><Button onClick={save}>{isNew ? "Create property" : "Save changes"}</Button></div>
+      <div className="mt-4 flex justify-end gap-2"><Button variant="outline" disabled={saving} onClick={onDone}>Cancel</Button><Button disabled={saving || uploading} onClick={save}>{saving ? "Saving…" : isNew ? "Create property" : "Save changes"}</Button></div>
     </>
   );
 }

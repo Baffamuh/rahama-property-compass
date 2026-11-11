@@ -13,7 +13,7 @@ import { LeadAdvisor } from "@/components/admin/LeadAdvisor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/enquiries")({
-  head: () => ({ meta: [{ title: "Enquiries — Rahama Admin" }, { name: "description", content: "Lead pipeline." }, { property: "og:title", content: "Enquiries — Rahama Admin" }, { property: "og:description", content: "Lead pipeline." }] }),
+  head: () => ({ meta: [{ title: "Enquiries — Rahama Admin" }, { name: "description", content: "Lead pipeline." }, { property: "og:title", content: "Enquiries — Rahama Admin" }, { property: "og:description", content: "Lead pipeline." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Enquiries,
 });
 

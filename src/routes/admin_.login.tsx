@@ -18,6 +18,8 @@ export const Route = createFileRoute("/admin_/login")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Admin Sign In — Rahama" },
       { property: "og:description", content: "Staff portal." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Login,

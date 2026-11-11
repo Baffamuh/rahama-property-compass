@@ -6,7 +6,7 @@ import { COMPANY, formatNaira } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/admin/receipt/$id")({
-  head: () => ({ meta: [{ title: "Official Receipt — Rahama Admin" }, { name: "description", content: "Printable official sales receipt." }, { property: "og:title", content: "Official Receipt — Rahama Admin" }, { property: "og:description", content: "Printable official sales receipt." }] }),
+  head: () => ({ meta: [{ title: "Official Receipt — Rahama Admin" }, { name: "description", content: "Printable official sales receipt." }, { property: "og:title", content: "Official Receipt — Rahama Admin" }, { property: "og:description", content: "Printable official sales receipt." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ReceiptPage,
 });
 

@@ -12,6 +12,8 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "Call, WhatsApp or visit Rahama Land and Property Development Ltd. in Azare, Bauchi State." },
       { property: "og:title", content: "Contact Rahama Land & Property" },
       { property: "og:description", content: "Phone, WhatsApp and office address in Azare, Bauchi State." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Contact,

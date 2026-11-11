@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/admin/team")({
-  head: () => ({ meta: [{ title: "Admin Accounts — Rahama Admin" }, { name: "description", content: "Create admin accounts." }, { property: "og:title", content: "Admin Accounts — Rahama Admin" }, { property: "og:description", content: "Create admin accounts." }] }),
+  head: () => ({ meta: [{ title: "Admin Accounts — Rahama Admin" }, { name: "description", content: "Create admin accounts." }, { property: "og:title", content: "Admin Accounts — Rahama Admin" }, { property: "og:description", content: "Create admin accounts." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Team,
 });
 

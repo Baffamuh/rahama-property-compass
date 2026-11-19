@@ -9,20 +9,23 @@ const inIframe = () => { try { return window.self !== window.top; } catch { retu
  * Walk the field with the phone. Press Start at one corner, walk round the edge;
  * the line grows on the map as you move. Press Finish to calculate and fill the listing.
  */
-export function GpsWalk({ onProgress, onFinish }: { onProgress: (points: LatLng[]) => void; onFinish: (points: LatLng[]) => void }) {
+export function GpsWalk({ onProgress, onFinish }: { onProgress: (points: LatLng[]) => void; onFinish: (points: LatLng[], cornersOnly: boolean, accuracyM: number) => void }) {
   const [walking, setWalking] = useState(false);
   const [points, setPoints] = useState<LatLng[]>([]);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const watch = useRef<number | null>(null);
   const live = useRef<LatLng[]>([]);
+  const corners = useRef<LatLng[]>([]);
+  const acc = useRef(10);
 
   const stopWatch = () => { if (watch.current !== null) navigator.geolocation.clearWatch(watch.current); watch.current = null; };
   useEffect(() => stopWatch, []);
 
   const push = (pt: LatLng, force = false) => {
     const last = live.current[live.current.length - 1];
-    if (!force && last && distanceM(last, pt) < 1.5) return; // add a point every ~1.5 m of walking
+    // Ignore GPS jitter: only add a point once you have really moved (at least 3 m, more when the signal is weak).
+    if (!force && last && distanceM(last, pt) < Math.max(3, acc.current * 0.6)) return;
     live.current = [...live.current, pt];
     setPoints(live.current);
     onProgress(live.current);
@@ -39,26 +42,29 @@ export function GpsWalk({ onProgress, onFinish }: { onProgress: (points: LatLng[
 
   const start = () => {
     if (!("geolocation" in navigator)) { setErr("This browser cannot use GPS. Tap the corners on the map instead."); return; }
-    setErr(null); live.current = []; setPoints([]); onProgress([]); setWalking(true);
+    setErr(null); live.current = []; corners.current = []; setPoints([]); onProgress([]); setWalking(true);
     // Ask once first so the phone shows its permission prompt, then follow movement.
     navigator.geolocation.getCurrentPosition((pos) => {
-      setAccuracy(Math.round(pos.coords.accuracy));
+      setAccuracy(Math.round(pos.coords.accuracy)); acc.current = pos.coords.accuracy;
+      corners.current = [[pos.coords.latitude, pos.coords.longitude]];
       push([pos.coords.latitude, pos.coords.longitude], true);
       watch.current = navigator.geolocation.watchPosition(
-        (p) => { setAccuracy(Math.round(p.coords.accuracy)); if (p.coords.accuracy <= 30) push([p.coords.latitude, p.coords.longitude]); },
+        (p) => { setAccuracy(Math.round(p.coords.accuracy)); acc.current = p.coords.accuracy; if (p.coords.accuracy <= 25) push([p.coords.latitude, p.coords.longitude]); },
         fail,
         { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 },
       );
     }, fail, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   };
 
-  const markCorner = () => navigator.geolocation.getCurrentPosition((pos) => push([pos.coords.latitude, pos.coords.longitude], true), fail, { enableHighAccuracy: true, maximumAge: 0 });
+  const markCorner = () => navigator.geolocation.getCurrentPosition((pos) => { const pt: LatLng = [pos.coords.latitude, pos.coords.longitude]; corners.current = [...corners.current, pt]; push(pt, true); }, fail, { enableHighAccuracy: true, maximumAge: 0 });
   const cancel = () => { stopWatch(); setWalking(false); live.current = []; setPoints([]); onProgress([]); };
   const finish = () => {
     stopWatch(); setWalking(false);
-    const invalid = validateBoundary(live.current);
-    if (invalid) { setErr(`Walk a bit more of the boundary first. ${invalid}`); live.current = []; setPoints([]); onProgress([]); return; }
-    onFinish(live.current);
+    // If corners were marked, use exactly those corners (most accurate). Otherwise use the walked track.
+    const chosen = corners.current.length >= 3 ? corners.current : live.current;
+    const invalid = validateBoundary(chosen);
+    if (invalid) { setErr(`Walk a bit more of the boundary first. ${invalid}`); live.current = []; corners.current = []; setPoints([]); onProgress([]); return; }
+    onFinish(chosen, corners.current.length >= 3, acc.current);
   };
 
   const area = points.length > 2 && !validateBoundary(points) ? polygonAreaSqm(points) : 0;
@@ -69,7 +75,7 @@ export function GpsWalk({ onProgress, onFinish }: { onProgress: (points: LatLng[
       <p className="flex items-center gap-2 text-sm font-semibold"><Footprints className="h-4 w-4 text-primary" />Walk the field with your phone</p>
       <ol className="list-decimal space-y-0.5 pl-5 text-xs text-muted-foreground">
         <li>Stand at one corner of the land and press <b>Start</b>.</li>
-        <li>Walk slowly along the edge — a green line follows you on the map.</li>
+        <li>Walk slowly along the edge — a green line follows you. For best accuracy press <b>Mark corner</b> at every corner.</li>
         <li>Back at the start, press <b>Finish</b>. Size is filled in automatically.</li>
       </ol>
       <div className="flex flex-wrap gap-2">

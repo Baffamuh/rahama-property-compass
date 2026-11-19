@@ -32,7 +32,7 @@ export function MeasurementEditor({ p, onChange }: { p: Property; onChange: (pat
     const unitForSize = p.sizeUnit === "hectares" ? "hectares" : p.sizeUnit === "sqm" ? "sqm" : "plots";
     onChange({ boundary: next.length ? next : undefined, mapAreaSqm: sqm, ...(sqm ? { size: sizeFromArea(sqm, unitForSize), sizeUnit: unitForSize } : {}) });
   };
-  const sides = !walking && !error && points.length > 2 && points.length <= 16 ? sideLengthsFt(points) : [];
+  const sides = !walking && !error && points.length > 2 && points.length <= 40 ? sideLengthsFt(points) : [];
   const applyDims = () => {
     const wf = Number(w), lf = Number(l);
     if (!(wf > 0 && lf > 0)) return;
@@ -49,7 +49,7 @@ export function MeasurementEditor({ p, onChange }: { p: Property; onChange: (pat
           <Button type="button" size="sm" variant="outline" disabled={!points.length} onClick={() => { if (confirm("Clear all boundary points?")) update([]); }}><Trash2 className="h-3.5 w-3.5" />Clear</Button>
         </div>
       </div>
-      <GpsWalk onProgress={(pts) => { setWalking(pts.length > 0); setPoints(pts); }} onFinish={(pts) => { setWalking(false); update(simplifyBoundary(pts)); }} />
+      <GpsWalk onProgress={(pts) => { setWalking(pts.length > 0); setPoints(pts); }} onFinish={(pts, cornersOnly, accM) => { setWalking(false); update(cornersOnly ? pts : simplifyBoundary(pts, Math.min(8, Math.max(3, accM * 0.5)))); }} />
       <p className="text-xs text-muted-foreground">Or tap the map at each corner of the land in order. Tap a numbered point to remove it. Map opens on Azare Central.</p>
       <ClientOnly fallback={<Skeleton h={340} />}><Suspense fallback={<Skeleton h={340} />}><BoundaryMap points={points} onChange={walking ? undefined : update} track={walking} height={340} /></Suspense></ClientOnly>
       {sides.length > 0 && (

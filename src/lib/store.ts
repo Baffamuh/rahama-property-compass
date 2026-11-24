@@ -1,6 +1,6 @@
 // App data store backed by the Lovable Cloud database (table `app_records`).
-// Pages read through `useStore` and write through `actions`; each action updates
-// the screen instantly, then saves the changed record to the database.
+// Pages read through `useStore` and write through `actions`; confirmed property,
+// enquiry and sale changes are persisted before displaying success.
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
@@ -134,11 +134,13 @@ export const actions = {
     setState({ ...state, enquiries: [enquiry, ...state.enquiries] });
     return true;
   },
-  updateEnquiry(id: string, patch: Partial<Enquiry>) {
+  async updateEnquiry(id: string, patch: Partial<Enquiry>) {
     const enquiries = state.enquiries.map((x) => (x.id === id ? { ...x, ...patch } : x));
-    setState({ ...state, enquiries });
     const e = enquiries.find((x) => x.id === id);
-    if (e) void put("enquiries", id, e);
+    if (!e || !await put("enquiries", id, e)) return false;
+    revision++;
+    setState({ ...state, enquiries: state.enquiries.map((x) => x.id === id ? e : x) });
+    return true;
   },
   async saveProperty(p: Property) {
     const exists = state.properties.some((x) => x.id === p.id);
@@ -233,20 +235,27 @@ export const actions = {
     setState({ ...state, agents: exists ? state.agents.map((x) => (x.id === a.id ? a : x)) : [...state.agents, a], activity: log(`${exists ? "Updated" : "Added"} agent ${a.name}`) });
     void put("agents", a.id, a);
   },
-  recordSale(s: Omit<Sale, "id" | "receiptNo" | "status" | "createdAt">): Sale {
+  async recordSale(s: Omit<Sale, "id" | "receiptNo" | "status" | "createdAt">): Promise<Sale | null> {
     const year = s.date.slice(0, 4);
     const n = state.sales.filter((x) => x.receiptNo.includes(`-${year}-`)).length + 1;
     const sale: Sale = { ...s, id: uid(), receiptNo: `RHM-RCP-${year}-${String(n).padStart(4, "0")}`, status: "Completed", createdAt: new Date().toISOString() };
     const prop = state.properties.find((p) => p.id === s.propertyId);
     const sold = prop ? { ...prop, status: (prop.listing === "Rent" ? "Rented" : "Sold") as Property["status"] } : undefined;
+    if (!sold) return null;
+    // One database statement persists both receipt and property status together.
+    const { error } = await supabase.from("app_records").upsert([
+      { collection: "sales", id: sale.id, data: sale as unknown as Json, updated_at: new Date().toISOString() },
+      { collection: "properties", id: sold.id, data: sold as unknown as Json, updated_at: new Date().toISOString() },
+    ]);
+    if (error) { notify("Sale could not be saved. No receipt was created. Please try again."); return null; }
+    revision++;
     setState({
       ...state,
       sales: [sale, ...state.sales],
       properties: sold ? state.properties.map((p) => (p.id === sold.id ? sold : p)) : state.properties,
       activity: log(`Sale recorded: ${s.propertyRef} (${sale.receiptNo})`),
     });
-    void put("sales", sale.id, sale);
-    if (sold) void put("properties", sold.id, sold);
+    writeCache();
     return sale;
   },
   cancelSale(id: string) {

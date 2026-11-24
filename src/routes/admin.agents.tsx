@@ -28,7 +28,7 @@ function AgentsPage() {
   const [editing, setEditing] = useState<Agent | null>(null);
   const [selling, setSelling] = useState(false);
   const years = useMemo(() => [...new Set([String(new Date().getFullYear()), ...sales.map((s) => s.date.slice(0, 4))])].sort().reverse(), [sales]);
-  const [year, setYear] = useState(years[0]!);
+  const [year, setYear] = useState(years[0] ?? String(new Date().getFullYear()));
   const rows = leaderboard(agents, sales, year);
   const top = rows[0] && rows[0].count > 0 ? rows.filter((r) => r.rank === 1) : [];
   const yearSales = sales.filter((s) => year === "all" || s.date.startsWith(year));
@@ -163,16 +163,20 @@ function SaleForm({ onDone }: { onDone: () => void }) {
   const agents = useStore((s) => s.agents).filter((a) => a.active);
   const properties = useStore((s) => s.properties).filter((p) => p.status !== "Sold" && p.status !== "Rented" && p.status !== "Archived");
   const [f, setF] = useState({ agentId: agents[0]?.id ?? "", propertyId: "", buyerName: "", buyerPhone: "", price: 0, amountPaid: 0, commission: 0, method: "Bank Transfer" as PaymentMethod, date: today() });
+  const [saving, setSaving] = useState(false);
   const prop = properties.find((p) => p.id === f.propertyId);
-  const save = (): void => {
+  const save = async (): Promise<void> => {
+    if (saving) return;
     if (!f.agentId || !prop) { toast.error("Choose the agent and the property"); return; }
     if (f.buyerName.trim().length < 2) { toast.error("Enter the buyer's name"); return; }
     if (f.price <= 0) { toast.error("Enter the agreed price"); return; }
     if (f.amountPaid < 0 || f.amountPaid > f.price) { toast.error("Amount paid must be between ₦0 and the agreed price"); return; }
     if (!confirm(`Record sale of ${prop.ref} for ${formatNaira(f.price)}? The property will be marked Sold.`)) { return; }
-    const sale = actions.recordSale({ ...f, buyerName: f.buyerName.trim(), propertyRef: prop.ref, propertyTitle: prop.title });
-    toast.success(`Sale recorded — receipt ${sale.receiptNo}`);
-    onDone();
+    setSaving(true);
+    try {
+      const sale = await actions.recordSale({ ...f, buyerName: f.buyerName.trim(), propertyRef: prop.ref, propertyTitle: prop.title });
+      if (sale) { toast.success(`Sale recorded — receipt ${sale.receiptNo}`); onDone(); }
+    } finally { setSaving(false); }
   };
   const num = (k: "price" | "amountPaid" | "commission") => <Input type="number" min={0} value={f[k] || ""} onChange={(e) => setF({ ...f, [k]: Number(e.target.value) })} />;
   return (
@@ -190,7 +194,7 @@ function SaleForm({ onDone }: { onDone: () => void }) {
         <div className="space-y-1.5"><Label>Date of sale</Label><Input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></div>
         {f.price > 0 && <p className="self-end pb-2 text-sm">Balance: <strong>{formatNaira(Math.max(0, f.price - f.amountPaid))}</strong></p>}
       </div>
-      <div className="mt-4 flex justify-end gap-2"><Button variant="outline" onClick={onDone}>Cancel</Button><Button onClick={save}>Record sale</Button></div>
+      <div className="mt-4 flex justify-end gap-2"><Button variant="outline" disabled={saving} onClick={onDone}>Cancel</Button><Button disabled={saving} onClick={save}>{saving ? "Saving…" : "Record sale"}</Button></div>
     </>
   );
 }

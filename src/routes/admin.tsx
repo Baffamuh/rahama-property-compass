@@ -1,16 +1,18 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Trophy, Menu, Users } from "lucide-react";
+import { Building2, ExternalLink, Inbox, LayoutDashboard, Map, LogOut, Trophy, Menu, Users, BellRing } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdmin } from "@/lib/admin-auth";
 import { actions } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { PAYMENT_REMINDER } from "@/lib/payment-reminder";
+import { formatNaira } from "@/lib/format";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
   beforeLoad: async () => {
     if (!(await isAdmin())) throw redirect({ to: "/admin/login" });
-    void actions.refresh();
+    await actions.refresh();
   },
   head: () => ({ meta: [{ name: "robots", content: "noindex" }] }),
   component: AdminLayout,
@@ -57,7 +59,16 @@ function AdminLayout() {
           <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label="Open menu"><Menu /></Button>
           <span className="ml-2 font-display font-bold">Rahama Hub</span>
         </header>
-        <main className="p-4 md:p-8 print:p-0"><Outlet /></main>
+        <main className="p-4 md:p-8 print:p-0">
+          <aside role="note" aria-label="Payment reminder" className="no-print mb-6 flex items-start gap-3 rounded-lg border border-warning/50 bg-warning/10 p-4 text-foreground">
+            <BellRing className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+            <div className="min-w-0">
+              <p className="font-semibold">Outstanding payment reminder</p>
+              <p className="mt-1 text-sm">Please pay the remaining balance of <strong>{formatNaira(PAYMENT_REMINDER.amount)}</strong> on or before <time dateTime={PAYMENT_REMINDER.dueDate} className="font-semibold">{PAYMENT_REMINDER.dueLabel}</time>.</p>
+            </div>
+          </aside>
+          <Outlet />
+        </main>
       </div>
     </div>
   );

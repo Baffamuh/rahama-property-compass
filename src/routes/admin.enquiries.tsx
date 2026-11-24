@@ -57,7 +57,7 @@ function Enquiries() {
           <div className="space-y-5 rounded-xl border bg-card p-6 lg:col-span-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div><h2 className="text-xl font-bold">{selected.name}</h2><p className="text-sm text-muted-foreground">{new Date(selected.createdAt).toLocaleString("en-NG")}</p></div>
-              <Select value={selected.status} onValueChange={(v) => { actions.updateEnquiry(selected.id, { status: v as EnquiryStatus }); toast.success(`Marked ${v}`); }}>
+              <Select value={selected.status} onValueChange={async (v) => { if (await actions.updateEnquiry(selected.id, { status: v as EnquiryStatus })) toast.success(`Marked ${v}`); }}>
                 <SelectTrigger className="w-48" aria-label="Enquiry status"><SelectValue /></SelectTrigger>
                 <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
               </Select>
@@ -69,11 +69,11 @@ function Enquiries() {
             </div>
             <div><p className="text-xs uppercase text-muted-foreground">Property</p><p className="font-medium">{selected.propertyRef ? `${selected.propertyRef} — ${selected.propertyTitle}` : "General enquiry"}</p></div>
             <div><p className="text-xs uppercase text-muted-foreground">Message</p><p className="mt-1 rounded-lg bg-muted p-3">{selected.message}</p></div>
-            <LeadAdvisor key={selected.id} name={selected.name} phone={selected.phone} message={selected.message} property={properties.find((p) => p.ref === selected.propertyRef)} onSaveNote={(n) => { const cur = notes[selected.id] ?? selected.notes; const next = cur ? `${cur}\n${n}` : n; setNotes({ ...notes, [selected.id]: next }); actions.updateEnquiry(selected.id, { notes: next }); toast.success("Saved to notes"); }} />
+            <LeadAdvisor key={selected.id} name={selected.name} phone={selected.phone} message={selected.message} property={properties.find((p) => p.ref === selected.propertyRef)} onSaveNote={async (n) => { const cur = notes[selected.id] ?? selected.notes; const next = cur ? `${cur}\n${n}` : n; if (await actions.updateEnquiry(selected.id, { notes: next })) { setNotes({ ...notes, [selected.id]: next }); toast.success("Saved to notes"); } }} />
             <div className="space-y-2">
               <p className="text-xs uppercase text-muted-foreground">Internal notes</p>
               <Textarea rows={4} value={notes[selected.id] ?? selected.notes} onChange={(e) => setNotes({ ...notes, [selected.id]: e.target.value })} placeholder="Only visible to staff…" />
-              <Button size="sm" onClick={() => { actions.updateEnquiry(selected.id, { notes: notes[selected.id] ?? selected.notes }); toast.success("Notes saved"); }}>Save notes</Button>
+              <Button size="sm" onClick={async () => { if (await actions.updateEnquiry(selected.id, { notes: notes[selected.id] ?? selected.notes })) toast.success("Notes saved"); }}>Save notes</Button>
             </div>
           </div>
         )}

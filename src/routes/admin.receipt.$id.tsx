@@ -12,11 +12,13 @@ export const Route = createFileRoute("/admin/receipt/$id")({
 
 function ReceiptPage() {
   const { id } = Route.useParams();
+  const ready = useStore((s) => s.ready);
   const sale = useStore((s) => s.sales.find((x) => x.id === id));
   const agent = useStore((s) => s.agents.find((a) => a.id === sale?.agentId));
   const property = useStore((s) => s.properties.find((p) => p.id === sale?.propertyId));
   const zone = useStore((s) => s.zones.find((z) => z.id === property?.zoneId));
 
+  if (!ready) return <p role="status" className="p-10 text-center">Loading receipt…</p>;
   if (!sale) return <div className="p-10 text-center"><p className="font-semibold">Receipt not found.</p><Link to="/admin/agents" className="text-primary">Back to sales</Link></div>;
   const balance = Math.max(0, sale.price - sale.amountPaid);
   const rows: [string, string][] = [
